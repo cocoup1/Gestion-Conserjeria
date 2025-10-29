@@ -1,0 +1,125 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Nueva Reserva {% endblock title %}
+
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="custom-card mb-4">
+        <div class="d-flex justify-content-between align-items-center custom-card-header">
+            <a href="{% url 'ver_reservas' %}" class="btn-icon-only" title="Volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h6 class="text-center w-100">MODIFICAR RESERVA</h6>
+        </div>
+        <div class="custom-card-body">
+
+            {% include "home/form-reserva-editar.html" %}
+     
+        </div>
+    </div>
+    {% include "includes/footer.html" %}
+</div>
+
+
+      <!-- Modal de Estacionamientos -->
+      <div class="modal fade" id="estacionamientosModal" tabindex="-1" aria-labelledby="estacionamientosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+           
+            {% include "home/ver-estacionamientos-disponibles.html" %}
+           
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock content %}
+
+{% block javascripts %}
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<style>
+    .flatpickr-calendar {
+      max-width: 12rem !important; 
+      left: 834.469px !important;
+      
+    }
+   
+  </style>
+
+<script>
+
+
+document.addEventListener('DOMContentLoaded', function() 
+{
+    const estacionamientosBody = document.getElementById('estacionamientos-body');
+    
+    async function cargarEstacionamientos() {
+        fetch('/estacionamientos-disponibles/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.estacionamientos) {
+                const tableBody = document.getElementById('estacionamientos-body');
+                tableBody.innerHTML = ''; // Limpiar el contenido anterior
+
+                data.estacionamientos.forEach(estacionamiento => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-id', estacionamiento.id);
+                    row.innerHTML = `
+                        <td>${estacionamiento.numero}</td>
+                        <td>${estacionamiento.ubicacion}</td>
+                        <td>${estacionamiento.tipo}</td>
+                    `;
+                    
+                    row.addEventListener('click', function() {
+                        seleccionarEstacionamiento(estacionamiento.id, estacionamiento.numero, estacionamiento.ubicacion);
+                    });
+                    tableBody.appendChild(row);
+                });
+            } else {
+                alert('No hay estacionamientos disponibles.');
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar estacionamientos:', error);
+            
+        });
+    }
+
+    cargarEstacionamientos();
+
+    flatpickr("#tiempo_permanencia", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        defaultHour: 1,
+        minuteIncrement: 60,
+        minTime: "01:00",
+        maxTime: "08:00",
+        onReady: function(selectedDates, dateStr, instance) {
+          instance.set({ minute: 0 }); // Set the minute to 0
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+          instance.set({ minute: 0 }); // Set the minute to 0
+        }
+      });
+
+});
+
+function seleccionarEstacionamiento(id, numero, ubicacion) {
+    document.getElementById('estacionamiento').value = id;
+    document.getElementById('numero_estacionamiento').value = numero;
+    document.getElementById('ubicacion_estacionamiento').value = ubicacion;
+    $('#estacionamientosModal').modal('hide');
+}
+
+
+</script>
+{% endblock javascripts %}

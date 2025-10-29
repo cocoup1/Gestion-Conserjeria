@@ -1,0 +1,190 @@
+
+.filter-input {
+  flex: 1;
+  min-width: 150px; /* Ajusta este valor según sea necesario */
+}
+.filter-button {
+  flex: 0 0 auto;
+}
+  .alinear-input{
+    margin-bottom: 0.7rem !important;
+  }
+  .formato-texto{
+    text-transform: none; /* Eliminar el uppercase */
+    text-transform: capitalize; /* Primera letra en mayúscula, el resto en minúscula */
+  }
+
+  .text-xxs {
+    font-size: 0.7rem !important;
+}
+.btn{
+  font-size: 0.9rem !important;
+}
+.form-control{
+  font-size: 0.9rem !important;
+}
+
+.card{
+  border: 2px solid rgba(0, 0, 0, .125);
+  border-radius: 0.25rem;
+}
+
+
+.container, .container-fluid, .container-lg, .container-md, .container-sm, .container-xl{
+  width: 100% !important;
+}
+
+.residente-label, .residente-span {
+  font-family: Arial, sans-serif; /* Cambia esto a la fuente que prefieras */
+  font-size: 14px; /* Cambia esto al tamaño de fuente que prefieras */
+  color: #333; /* Cambia esto al color que prefieras */
+}
+h5 {
+  margin-bottom: 0.5rem; /* Ajusta el margen inferior del título */
+}
+
+.d-none {
+  display: none;
+}
+
+/* Estilos para mejorar diseño de tablas */
+.btn-custom {
+  background: linear-gradient(87deg, #28a745 0, #218838 100%); /* Degradado verde */
+  color: #fff;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-custom:hover {
+  background: linear-gradient(87deg, #218838 0, #28a745 100%); /* Degradado verde más oscuro al pasar el cursor */
+  color:#fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.btn-pdf {
+  background: transparent; /* Fondo transparente */
+  color: #295eff; /* Color del texto */
+  border: 2px solid #295eff; /* Borde con color #295eff */
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-pdf:hover {
+  background: #295eff; /* Fondo azul al pasar el cursor */
+  color: #fff; /* Color del texto blanco al pasar el cursor */
+  box-shadow: 0 4px 6px rgba(245, 239, 239, 0.944);
+}
+
+.custom-card {
+  background: #fff;
+  /* border-radius: 1rem; */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+
+}
+.custom-card-header {
+  border-bottom: 1px solid #dee2e6;
+ 
+  margin-bottom: 1rem;
+}
+.custom-card-header h6 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.table th, .table td {
+  vertical-align: middle;
+}
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+.table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: small;
+}
+.help-text {
+  color: #e74c3c;
+  font-size: 0.875rem;
+}
+
+/* Estilos de la tabla */
+.table th, .table td {
+  vertical-align: middle;
+  padding-top: 0.5rem;
+  padding-bottom: 0rem;
+}
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+.table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Estilos para el accordion */
+
+.horizontal-accordion {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 1rem;
+}
+.horizontal-accordion .accordion-item {
+  flex: 1;
+  background-color: #f8f9fa; /* Color de fondo alegre */
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 300px; /* Ajusta este valor según sea necesario */
+}
+.horizontal-accordion .accordion-header {
+  background-color: #007bff; /* Color de fondo del encabezado */
+  color: #fff;
+  /* padding: 1rem; */
+  border-radius: 0.5rem 0.5rem 0 0;
+  cursor: pointer;
+}
+.horizontal-accordion .accordion-button {
+  background-color: #007bff; /* Color de fondo del botón */
+  color: #fff;
+  border: none;
+  width: 100%;
+  text-align: left;
+  padding: 1rem;
+}
+.horizontal-accordion .accordion-button:not(.collapsed) {
+  background-color: #0056b3; /* Color de fondo del botón cuando está expandido */
+}
+.horizontal-accordion .accordion-collapse {
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+.form-group {
+  margin-bottom: -0.2rem;
+}
+
+
+/* Estilos para mejorar diseño de tablas */
+  .table-hover tbody tr:hover {
+    background-color: #f1f1f1; /* Color de fondo al pasar el cursor */
+    cursor: pointer; /* Cambiar el cursor a una mano */
+  }
+
+  /* Estilo para la accion Volver de los formularios */
+  .btn-icon-only {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+.btn-icon-only i {
+    color: darkorange; /* Puedes ajustar el color de la flecha aquí */
+    font-size: 1.5rem;  /*Ajusta el tamaño del ícono si es necesario */
+}
+
+
+  

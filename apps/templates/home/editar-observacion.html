@@ -1,0 +1,31 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Empleados-Conserjes {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="container-fluid py-4">
+      
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h6>Editar Observacion</h6>
+        </div>
+        <div class="card-body">
+         <h4 class="card-title">Datos del libro</h4>
+
+         {% include "home/form.html" %}
+         
+           <p> TUTORIAL : https://www.youtube.com/watch?v=ezIj71CX944&t=251s</p>
+        </div>
+      </div>
+      {% include "includes/footer.html" %}
+
+    </div>
+    
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

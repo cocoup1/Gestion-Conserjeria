@@ -1,0 +1,6 @@
+# comuna_dropdown_list_options
+
+<option value="">---------</option>
+{% for comuna in comunas %}
+<option value="{{ comuna.pk }}">{{ comuna.nombre }}</option>
+{% endfor %}

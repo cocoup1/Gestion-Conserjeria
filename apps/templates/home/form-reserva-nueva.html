@@ -1,0 +1,366 @@
+
+
+        <!-- Fila para el Filtro -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="custom-card mb-1 mt-1">
+              <div class="custom-card-header">
+                <h6>Buscar Propiedad</h6>
+              </div>
+              <div class="custom-card-body p-4" style="padding: 0.5rem !important;">
+                <form method="get" action="{% url 'crear_reserva' %}" id="buscarPropiedadForm">
+                  <div class="row">
+                    <div class="col-md-12 d-flex justify-content-between align-items-center">
+                      <input type="text" id="numero_propiedad" name="numero_propiedad" class="form-control me-2" 
+                      placeholder="Ingrese número de la propiedad" style="flex: 1;">
+                      <button type="submit" class="btn btn-primary formato-texto me-2" style="margin-bottom: 0;">
+                        <i class="fas fa-search"></i> Buscar</button>
+                      <a href="{% url 'crear_reserva' %}" class="btn btn-secondary formato-texto" style="margin-bottom: 0;">
+                        <i class="fas fa-eraser"></i> Limpiar
+                      </a>
+                    </div>  
+                    <div id="id_residente2_error" class="text-danger small" style="font-weight: 600;"></div>
+                
+                    </div>                    
+                  </div>                  
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        <!-- Fila para los Datos del Residente -->
+    <div class="row" id="datosResidente" style="display: none;">
+        <div class="col-md-12">
+        <div class="custom-card mb-1 mt-1">
+            <div class="custom-card-header">
+            <h6>Datos del Residente</h6>
+            </div>
+            <div class="custom-card-body" >
+                <div class="row">
+                  <div class="col-md-12 d-flex flex-wrap align-items-center">
+                    <div class="form-group me-4">
+                      <label for="nombre_completo_residente" class="form-label">Residente:</label>
+                      <div id="nombre_completo_residente" class="d-inline-block p-2 rounded bg-light" style="font-size: small;">
+                          {{ residente.nombres }} {{ residente.apellido_paterno }} {{ residente.apellido_materno }}
+                      </div>
+                    </div>
+
+                    <div class="form-group me-4">
+                      <label for="telefono_residente" class="form-label">N° Contacto: </label>
+                      <div id="telefono_residente" class="d-inline-block p-2 rounded bg-light" style="font-size: small;">
+                        {{ residente.telefono }}</div>
+
+                    </div>
+                    <div class="form-group me-4">
+                      <label for="numero_propiedad_label" class="form-label">Número Propiedad: </label>
+                      <div id="numero_propiedad_label" class="d-inline-block p-2 rounded bg-light" style="font-size: small;">
+                        {{ propiedad.numero }}</div>
+                      <input type="hidden" id="propiedad" name="propiedad" value="{{ propiedad.id }}">
+                    </div>
+                    <div class="form-group">
+                      <label for="piso_propiedad" class="form-label">Piso: </label>
+                      <div id="piso_propiedad" class="d-inline-block p-2 rounded bg-light" style="font-size: small;">
+                        {{ propiedad.piso }}</div>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+              
+        </div>
+        </div>
+    </div>
+      </div>
+  
+     <!-- Formulario de Reserva -->
+     <form enctype="multipart/form-data" id="reservaEstacionamientoForm" method="post" autocomplete="off" novalidate>
+      {% csrf_token %}
+  
+      <!-- Acordeón Horizontal para Secciones -->
+      <div class="horizontal-accordion">
+        
+            <!-- Sección de Visitas -->
+            <div class="accordion-item">
+            <div class="accordion-header" id="headingVisit">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVisit" aria-expanded="true" aria-controls="collapseVisit">
+                Datos de Visita
+                </button>
+            </div>
+            <div id="collapseVisit" class="accordion-collapse collapse show" aria-labelledby="headingVisit" data-bs-parent="#formAccordion">
+                <div class="accordion-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.rut_visita.id_for_label }}" class="form-label">{{ formulario.rut_visita.label }}</label>
+                            {{ formulario.rut_visita }}
+                        </div>
+                        {% if formulario.rut_visita.errors %}
+                            <div class="text-danger small">{{ formulario.rut_visita.errors }}</div>
+                        {% endif %}
+                        <div id="rut_visita_error2" class="text-danger small"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.nombre_visita.id_for_label }}" class="form-label">{{ formulario.nombre_visita.label }}</label>
+                            {{ formulario.nombre_visita }}
+                        </div>
+                        {% if formulario.nombre_visita.errors %}
+                            <div class="text-danger small">{{ formulario.nombre_visita.errors }}</div>
+                        {% endif %}
+                        <div id="nombre_visita_error2" class="text-danger small"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.apellido_paterno_visita.id_for_label }}" class="form-label">{{ formulario.apellido_paterno_visita.label }}</label>
+                            {{ formulario.apellido_paterno_visita}}
+                        </div>
+                        {% if formulario.apellido_paterno_visita.errors %}
+                            <div class="text-danger small">{{ formulario.apellido_paterno_visita.errors }}</div>
+                        {% endif %}
+                        <div id="apellido_paterno_visita_error2" class="text-danger small"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.apellido_materno_visita.id_for_label }}" class="form-label">{{ formulario.apellido_materno_visita.label }}</label>
+                            {{ formulario.apellido_materno_visita }}
+                        </div>
+                        {% if formulario.apellido_materno_visita.errors %}
+                            <div class="text-danger small">{{ formulario.apellido_materno_visita.errors }}</div>
+                        {% endif %}
+                        <div id="apellido_materno_visita_error2" class="text-danger small"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.telefono_visita.id_for_label }}" class="form-label">{{ formulario.telefono_visita.label }}</label>
+                            {{ formulario.telefono_visita }}
+                        </div>
+                        {% if formulario.telefono_visita.errors %}
+                            <div class="text-danger small">{{ formulario.telefono_visita.errors }}</div>
+                        {% endif %}
+                        <div id="telefono_visita_error2" class="text-danger small"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.relacion_residente.id_for_label }}" class="form-label">{{ formulario.relacion_residente.label }}</label>
+                            {{ formulario.relacion_residente }}
+                        </div>
+                        {% if formulario.relacion_residente.errors %}
+                            <div class="text-danger small">{{ formulario.relacion_residente.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ formulario.residente.id_for_label }}" class="form-label"></label>
+                        {{ formulario.residente }}
+                    </div>
+                    {% if formulario.residente.errors %}
+                        <div class="text-danger small">{{ formulario.residente.errors }}</div>
+                    {% endif %}
+                    <div id="relacion_residente_error2" class="text-danger small"></div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            </div>
+    
+            <!-- Sección de Datos del Vehículo -->
+            <div class="accordion-item">
+                <div class="accordion-header" id="headingVehicle">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVehicle" aria-expanded="false" aria-controls="collapseVehicle">
+                    Datos del Vehículo
+                </button>
+                </div>
+                <div id="collapseVehicle" class="accordion-collapse collapse" aria-labelledby="headingVehicle" data-bs-parent="#formAccordion">
+                <div class="accordion-body">
+                    <div class="row">    
+                    <div class="col-md-6">
+                      <div class="form-group">
+                          <label for="patenteVehiculo" class="form-label">Patente del Vehículo</label>
+                          <input type="text" id="id_patente_vehiculo" name="patente_vehiculo" class="form-control" disabled maxlength="8">
+                          <div id="patenteVehiculo_error" class="text-danger small"></div>
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="form-group">
+                          <label for="descripcionVehiculo" class="form-label">Descripción del Vehículo</label>
+                          <input type="text" id="id_descripcion_vehiculo" name="descripcion_vehiculo" class="form-control" disabled maxlength="50">
+                          <div id="descripcionVehiculo_error" class="text-danger small"></div>
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="form-group">
+                          <label for="tiempoPermanencia" class="form-label">Tiempo de Permanencia</label>
+                          <input type="text" id="tiempo_permanencia" name="tiempo_permanencia" class="form-control">
+                          <div id="tiempoPermanencia_error" class="text-danger small"></div>
+                      </div>
+                  </div>
+                  <div class="col-md-6">
+                      <div class="form-group">
+                          <label for="idFechaLlegadaVisita" class="form-label">Fecha de Llegada</label>
+                          <input type="datetime" id="id_fecha_llegada_visita" name="fecha_llegada_visita" class="form-control" disabled>
+                          <div id="idFechaLlegadaVisita_error" class="text-danger small"></div>
+                      </div>
+                  </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                        <label for="numero_estacionamiento" class="form-label">Número Estacionamiento</label>
+                        <input type="text" id="numero_estacionamiento" name="numero_estacionamiento" class="form-control" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                        <label for="ubicacion_estacionamiento" class="form-label">Ubicación Estacionamiento</label>
+                        <input type="text" id="ubicacion_estacionamiento" name="ubicacion_estacionamiento" class="form-control" readonly>
+                        </div>
+                    </div>
+                    
+                    </div>
+                    <!-- Botón para abrir el modal de estacionamientos -->
+                    <a href="#" class="icon-button mt-4" data-bs-toggle="modal" data-bs-target="#estacionamientosModal" title="Ver Estacionamientos Disponibles">
+                      <i class="fas fa-car" style="font-size: large; color:red;"></i>
+                  </a>
+                   
+                </div>
+                </div>
+          </div>
+
+      </div>
+      <!-- Campo ocultos para enviar al formulario -->
+      <input type="hidden" id="empleado" name="empleado" value="{{ request.session.empleado_id }}">   
+      <input type="hidden" id="estacionamiento" name="estacionamiento">
+      <input type="hidden" id="id_residente2" name="id_residente2" value="{{residente.id_residente2}}">
+
+      <div class="d-none">
+        {{ formulario.propiedad }}
+       
+      </div>
+      <!-- Error general del formulario -->
+      {% if formulario.non_field_errors %}
+      <div class="alert alert-danger">
+        <ul>
+          {% for error in formulario.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- {% if msg %}
+      <div class="alert alert-warning">
+          {{ msg }}
+      </div>
+      {% endif %} -->
+      
+      <div class="text-center">
+        <div class="d-flex justify-content-center" style="margin-bottom: -1rem;">
+            <input type="submit" class="btn btn-success btn-lg me-2" value="Guardar" style="width: 200px;">
+            <a href="#" class="btn btn-secondary btn-md" style="width: 200px;" onclick="limpiarCampos()">Limpiar</a>
+        </div>
+    </div>
+     </form>
+
+
+     {% load static %}
+<script src="{% static 'assets/js/rutValidator.js' %}"></script>
+<script src="{% static 'assets/js/utils.js' %}"></script>
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    configurarValidacionRut('.rut', '#rut_visita_error2'); // Selector genérico para todos los campos con clase "rut"
+    document.getElementById('reservaEstacionamientoForm').addEventListener('submit', validarFormularioRut);
+});
+
+
+document.addEventListener('DOMContentLoaded', function () 
+{
+  configurarValidacionLetrasYEspacios('.solo-letras'); // Configurar la validación de letras y espacios
+  configurarValidacionSoloNumeros('.solo-numeros'); 
+});
+
+
+    // Agregar el evento de validación al formulario
+document.getElementById('reservaEstacionamientoForm').addEventListener('submit', function(event)
+{
+        if (!validarCamposVaciosFormularioReserva()) {
+            event.preventDefault(); // Evitar el envío del formulario si hay campos vacíos
+        }
+});
+
+
+function limpiarCampos()
+{      
+          document.getElementById('id_rut_visita').value = '';
+          document.getElementById('id_nombre_visita').value = '';
+          document.getElementById('id_apellido_paterno_visita').value = '';
+          document.getElementById('id_apellido_materno_visita').value = '';
+          document.getElementById('id_telefono_visita').value = '';
+          document.getElementById('id_relacion_residente').value = '';
+          document.getElementById('id_patente_vehiculo').value = '';
+          document.getElementById('id_descripcion_vehiculo').value = '';
+          document.getElementById('tiempo_permanencia').value = '';
+          document.getElementById('id_fecha_llegada_visita').value = '';
+          document.getElementById('numero_estacionamiento').value = '';
+          document.getElementById('ubicacion_estacionamiento').value = '';
+          document.getElementById('estacionamiento').value = '';
+
+  }
+
+
+  function validarCamposVaciosFormularioReserva() 
+  {
+    var rutVisita = document.getElementById('id_rut_visita');
+    var nombreVisita = document.getElementById('id_nombre_visita');
+    var apellidoPaternoVisita = document.getElementById('id_apellido_paterno_visita');
+    var apellidoMaternoVisita = document.getElementById('id_apellido_materno_visita');
+    var telefonoVisita = document.getElementById('id_telefono_visita');
+    var relacionResidente = document.getElementById('id_relacion_residente');
+    const idResidente2 = document.getElementById("id_residente2").value.trim();
+    // Limpiar mensajes de error anteriores
+    document.querySelectorAll('.text-danger.small').forEach(function(el) {
+        el.innerHTML = '';
+    });
+    var isValid = true;
+    if (rutVisita.value.trim() === '') {
+        document.getElementById('rut_visita_error2').innerHTML = 'El RUT es obligatorio.';
+        isValid = false;
+    }
+    if (nombreVisita.value.trim() === '') {
+        document.getElementById('nombre_visita_error2').innerHTML = 'El nombre es obligatorio.';
+        isValid = false;
+    } 
+    if (apellidoPaternoVisita.value.trim() === '') {
+        document.getElementById('apellido_paterno_visita_error2').innerHTML = 'El apellido paterno es obligatorio.';
+        isValid = false;
+    } 
+    if (apellidoMaternoVisita.value.trim() === '') {
+        document.getElementById('apellido_materno_visita_error2').innerHTML = 'El apellido materno es obligatorio.';
+        isValid = false;
+    } 
+    if (telefonoVisita.value.trim() === '') {
+        document.getElementById('telefono_visita_error2').innerHTML = 'El teléfono contacto es obligatorio.';
+        isValid = false;
+    }
+    if (relacionResidente.value.trim() === '') {
+        document.getElementById('relacion_residente_error2').innerHTML = 'La relación con residente es obligatorio.';
+        isValid = false;
+    }
+
+    const errorContainer = document.getElementById("");
+    if (idResidente2 === '') {    
+      document.getElementById('id_residente2_error').innerHTML = 'Primero debe ingresar N° de la propiedad y seleccionar un Residente.'; 
+        isValid = false;
+    } 
+    return isValid; // Permitir o evitar el envío del formulario
+}
+
+
+
+</script>
+ 

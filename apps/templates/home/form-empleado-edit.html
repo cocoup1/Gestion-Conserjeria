@@ -1,0 +1,101 @@
+<form enctype="multipart/form-data" id="personEditForm" method="post" autocomplete="off" novalidate>
+  {% csrf_token %}
+  
+  <div class="row justify-content-center">
+      <div class="col-md-11">
+        <div class="d-flex justify-content-between align-items-center custom-card-header">
+            <a href="{% url 'ver_conserjes' %}" class="btn-icon-only" title="Volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h6 class="text-center w-100">MODIFICAR EMPLEADO</h6>
+        </div>
+
+        <div class="row">  
+              {% for campo in formulario %}
+                  <div class="col-md-6">
+                      <div class="form-group">
+                          <label for="{{ campo.id_for_label }}" class="form-label">{{ campo.label }}</label>                       
+
+                          {% if campo.name == 'sexo' %}
+                              <div>
+                                  {% for subcampo in campo %}
+                                      <div class="form-check form-check-inline">
+                                          {{ subcampo.tag }}
+                                          <label class="form-check-label" for="{{ subcampo.id_for_label }}">
+                                              {{ subcampo.choice_label }}
+                                          </label>
+                                      </div>
+                                  {% endfor %}
+                              </div>
+                          
+                          {% else %}
+                              {{ campo }}
+                          {% endif %}
+                      </div>
+                      {% if campo.errors %}
+                          <div class="text-danger small">{{ campo.errors }}</div>
+                      {% endif %}
+                  </div>
+              {% endfor %}
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    <li>{{ field }}: {{ errors|striptags }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+          {% endif %}
+          {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                  {{ form.non_field_errors }}
+              </div>
+          {% endif %}
+        
+          {% if msg %}
+              <div class="alert alert-danger">
+                  {{ msg }}
+              </div>
+          {% endif %}
+
+          <div class="row" style="margin-top: 1rem;">
+            <div class="col-md-12 d-flex justify-content-center mb-3">
+              <input type="submit" class="btn btn-success" value="Guardar" style="width: 220px;">
+            </div>
+          </div>
+
+      </div>
+  </div>
+
+  <!-- Campos ocultos para los valores deshabilitados -->
+  <input type="hidden" name="rut" value="{{ formulario.rut.value }}">
+  <input type="hidden" name="nombres" value="{{ formulario.nombres.value }}">
+  <input type="hidden" name="apellido_paterno" value="{{ formulario.apellido_paterno.value }}">
+  <input type="hidden" name="apellido_materno" value="{{ formulario.apellido_materno.value }}">
+  <input type="hidden" name="sexo" value="{{ formulario.sexo.value }}">    
+  <input type="hidden" name="fecha_ingreso" value="{{ formulario.fecha_ingreso.value|date:'Y-m-d' }}">
+ <input type="hidden" name="id_rol" value="{{ formulario.id_rol.value }}">
+
+</form>
+
+{% load static %}
+<script src="{% static 'assets/js/utils.js' %}"></script>
+
+<script>
+  
+document.addEventListener('DOMContentLoaded', function () 
+{
+  configurarValidacionSoloNumeros('.solo-numeros'); 
+  //configurarValidacionEmail('.email', '#correo_electronico_error2');
+});
+
+document.getElementById('personEditForm').addEventListener('submit', function(event)
+{
+        if (!validarCamposVaciosFormularioEmpleadoEdit()) {
+            event.preventDefault(); // Evitar el envío del formulario si hay campos vacíos
+        }
+});
+
+</script>

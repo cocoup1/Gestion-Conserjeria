@@ -1,0 +1,58 @@
+<form enctype="multipart/form-data" id="estacionamientoForm" method="post" autocomplete="off" novalidate>
+  {% csrf_token %}
+  
+  <div class="row justify-content-center">
+      <div class="col-md-11">
+          <div class="text-center custom-card-header">
+              <h6>NUEVO ESTACIONAMIENTO</h6>
+          </div>
+          <div class="row">  
+              {% for campo in formulario %}
+                  <div class="col-md-6">
+                      <div class="form-group mb-3">
+                          <label for="{{ campo.id_for_label }}" class="form-label">{{ campo.label }}</label>
+                          {{ campo }}
+                      </div>
+                      {% if campo.errors %}
+                          <div class="text-danger small">{{ campo.errors }}</div>
+                      {% endif %}
+                  </div>
+              {% endfor %}
+          </div>
+
+          {% if form.errors %}
+          <div class="alert alert-danger">
+              <ul>
+                  {% for field, errors in form.errors.items %}
+                      <li>{{ field }}: {{ errors|striptags }}</li>
+                  {% endfor %}
+              </ul>
+          </div>
+          {% endif %}
+          {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                  {{ form.non_field_errors }}
+              </div>
+          {% endif %}
+
+          <div class="row">
+              <div class="col-md-6 d-grid mb-3">
+                  <input type="submit" class="btn btn-success" value="Guardar">
+              </div>
+              <div class="col-md-6 d-grid mb-3">
+                  <button type="button" class="btn btn-secondary" onclick="resetForm()">Limpiar</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Campos ocultos para los valores deshabilitados -->
+  <input type="hidden" name="id" value="{{ item.numero_estacionamiento }}">
+
+</form>
+
+<script>
+  function resetForm() {
+      document.getElementById('estacionamientoForm').reset();
+  }
+</script>

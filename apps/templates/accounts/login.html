@@ -1,0 +1,125 @@
+{% extends 'layouts/base-fullscreen.html' %}
+
+{% block title %} Iniciar sesión {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+  .btn-custom {
+      background: linear-gradient(87deg, #11cdef 0, #1171ef 100%);
+      color: #fff;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+  }
+  .btn-custom:hover {
+      background: linear-gradient(87deg, #1171ef 0, #11cdef 100%);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="container position-sticky z-index-sticky top-0">
+    <div class="row">
+      <div class="col-12">
+
+        {% include "includes/navigation-fullscreen.html" %}
+
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content  mt-0">
+    <section>
+      <div class="page-header min-vh-75">
+        <div class="container">
+          <div class="row">
+            <div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
+              <div class="card card-plain mt-8">
+                <div class="card-header pb-0 text-left bg-transparent">
+                  <h3 class="font-weight-bolder text-info text-gradient">
+                    Iniciar Sesión
+                  </h3>
+                  <p class="mb-0">                  
+                      Ingresa tus credenciales                               
+                  </p>
+                 
+                </div>
+               
+                  <div class="card-body">
+
+                    <form role="form text-left" method="post" action="">
+                      
+                      {% csrf_token %}
+  
+                      <label>Usuario</label>
+                      <div class="mb-3">
+                        {{ form.username }}
+                      </div>
+  
+                      <label>Contraseña</label>
+                      <div class="mb-3">
+                        {{ form.password }}
+                      </div>
+  
+                      <p class="mb-0">
+                        {% if msg %}
+                          <span class="text-danger">{{ msg | safe }}</span>
+                        
+                        {% endif %}                     
+                      </p>
+                      <div class="text-center">
+                        <button type="submit" name="login" class="btn btn-custom w-100 mt-4 mb-0">Ingresar</button>
+                      </div>
+  
+                      <!-- <div class="text-center">
+                        <a href="{% url 'register' %}" class="btn bg-gradient-secondary w-100 mt-4 mb-0">Sign UP</a>
+                      </div> -->
+  
+                    </form>
+  
+                  </div>
+                
+                
+                <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                  <p class="mb-4 text-sm mx-auto">
+
+                    <!-- GitHub button starts here -->
+                    {% if SOCIAL_AUTH_GITHUB %}
+                      
+                      <p class="mb-2">or SignIn with</p>
+                      
+                      <a class="btn btn-outline" href="#">
+                        <span class="text-lg fs-1 fab fa-github"></span>
+                      </a>
+                          
+                    {% endif %}
+                    <!-- GitHub ends here -->
+                                                           
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="oblique position-absolute top-0 h-100 d-md-block d-none me-n8">
+                <div class="oblique-image bg-cover position-absolute fixed-top ms-auto h-100 z-index-0 ms-n6" style="background-image:url('{{ ASSETS_ROOT }}/img/curved-images/curved6.jpg')"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  {% include "includes/footer-fullscreen.html" %}
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

@@ -1,0 +1,31 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Registrar Estacionamiento {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+
+{% block content %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+      <div class="col-md-10">
+          <div class="custom-card shadow-sm">
+              <div class="custom-card-body p-4">
+                {% include "home/form-estacionamiento.html" %}
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+  {% include "includes/footer.html" %}
+
+    
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}
+
+
+

@@ -1,0 +1,104 @@
+{% extends 'layouts/base.html' %}
+{% load form_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h4 class="text-center mb-4">Actualizar Contraseña</h4>
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                       
+                        <div class="form-group mb-3">
+                            <label for="{{ form.new_password.id_for_label }}" class="form-label">Nueva Contraseña</label> 
+                            <input type="password" id="new_password" name="{{ form.new_password.html_name }}" class="form-control" maxlength="15"> <!-- Campo con ID -->
+                            {% if form.new_password.errors %}
+                                <div class="text-danger">
+                                    {{ form.new_password.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <!-- Reglas de contraseña -->
+                        <div id="password-rules" class="mb-3">
+                            <p class="small text-muted" style="margin-bottom: 0rem;">La contraseña debe cumplir con las siguientes reglas:</p>
+                            <ul class="list-unstyled">
+                                <li id="min_length" class="text-danger small">Al menos 8 caracteres</li>
+                                <li id="uppercase" class="text-danger small">Al menos una letra mayúscula</li>
+                                <li id="lowercase" class="text-danger small">Al menos una letra minúscula</li>
+                                <li id="digit" class="text-danger small">Al menos un dígito</li>
+                                <li id="special" class="text-danger small">Al menos un carácter especial</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.confirm_password.id_for_label }}" class="form-label">Confirmar Nueva Contraseña</label>
+                            {{ form.confirm_password|add_class:"form-control" }}
+                            {% if form.confirm_password.errors %}
+                                <div class="text-danger small">
+                                    {{ form.confirm_password.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid mb-3" >
+                            <button type="submit" class="btn btn-primary" style="margin-bottom: -0.5rem;">Guardar Cambios</button>
+                        </div>
+                        <div class="d-grid" style="margin-bottom: -1rem;">
+                            <a href="{% url 'inicio' %}" class="btn btn-secondary">Volver</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script de SweetAlert2  - este gatilla cuando se produce un error desde la view -->
+{% if messages %}
+<script>
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     {% for message in messages %}
+    //     Swal.fire({
+    //         icon: '{% if message.tags == "success" %}success{% else %}error{% endif %}',
+    //         title: '{% if message.tags == "success" %}Éxito{% else %}Error{% endif %}',
+    //         text: '{{ message }}',
+    //         confirmButtonText: 'OK'
+    //     });
+    //     {% endfor %}
+    // });
+</script>
+{% endif %}
+<!-- Script de SweetAlert2  FIN  -->
+
+<!-- Script de validación en tiempo real para las reglas de la contraseña -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() 
+    {
+        const passwordInput = document.getElementById('new_password');
+        const rules = {
+            min_length: /.{8,}/,
+            uppercase: /[A-Z]/,
+            lowercase: /[a-z]/,
+            digit: /\d/,
+            special: /[!@#$%^&*(),.?":{}|<>]/
+        };
+
+        passwordInput.addEventListener('input', function() {
+            const value = passwordInput.value;
+            for (const [rule, regex] of Object.entries(rules)) {
+                const element = document.getElementById(rule);
+                if (regex.test(value)) {
+                    element.classList.remove('text-danger');
+                    element.classList.add('text-success');  // Cambiar a verde cuando se cumple la regla
+                } else {
+                    element.classList.remove('text-success');
+                    element.classList.add('text-danger');  // Mantener en rojo si la regla no se cumple
+                }
+            }
+        });
+     
+    });
+</script>
+{% endblock %}

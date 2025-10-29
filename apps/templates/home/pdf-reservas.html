@@ -1,0 +1,133 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro Reservas</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        header img {
+            height: 60px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            margin: 10px 0 5px;
+            color: #333;
+        }
+
+        header p {
+            font-size: 14px;
+            margin: 0;
+            color: #777;
+        }
+
+        footer {
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #f2f2f2;
+            padding: 10px 0;
+            border-top: 2px solid #ddd;
+            font-size: 12px;
+            color: #555;
+        }
+
+        footer .page-number:after {
+            content: counter(page);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            color: #333;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 12px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .logo {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .logo img {
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+
+        <h1>Registro de Visitas y Reservas de Estacionamientos</h1>
+        <p>Generado por el Sistema Gestión de Conserjería</p>
+    </header>
+
+    <footer>
+        <p>© 2024 Sistema de Gestión de Conserjería | Página <span class="page-number"></span></p>
+    </footer>
+
+    <main>
+        <table>
+            <thead>
+                <tr>
+                    <th>RUT</th>
+                    <th>Nombre</th>
+                    <th>Patente</th>
+                    <th>Ubicación</th>
+                    <th>N° Est.</th>
+                    <th>Fecha Llegada</th>
+                    <th>Fecha Salida</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in reservas %}
+                <tr>
+                    <td>{{ item.rut_visita }}</td>
+                    <td>{{ item.nombre_completo }}</td>
+                    <td>{{ item.patente_vehiculo }}</td>
+                    <td>{{ item.ubicacion_estacionamiento }}</td>
+                    <td>{{ item.numero_estacionamiento }}</td>
+                    <td>{{ item.fecha_llegada_visita }}</td>
+                    <td>{{ item.fecha_fin_visita }}</td>
+                    <td>{{ item.estado_estacionamiento }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

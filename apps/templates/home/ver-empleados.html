@@ -1,0 +1,125 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Listado de Observaciones {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="custom-card">
+        <div class="custom-card-header w-100 text-center">
+          <h6>REGISTRO DE EMPLEADOS</h6>
+        </div>
+
+        <!-- Card para el formulario de búsqueda -->
+        <div class="custom-card-body">
+          <div class="row">           
+            <div class="col-md-12 d-flex justify-content-start" style="margin-bottom: -0.8rem;">
+              <a class="btn btn-custom me-2" href="{% url 'crear_conserje' %}">Nuevo</a>              
+            
+              <!-- <a class="btn btn-pdf" href="{% url 'exportar_empleados_pdf' %}" target="_blank"><i class="fas fa-download"></i> PDF</a> -->
+            
+            
+            </div>
+          </div>
+        
+          <div class="row">
+            <div class="col-md-12">
+              <div class="custom-card">
+                <div class="custom-card-header">
+                  <h6>Filtros</h6>
+                </div>
+                <div class="custom-card-body">
+                  <form method="GET" action="{% url 'ver_conserjes' %}">
+                    <div class="row align-items-center">
+                      <div class="col-md-3 alinear-input">
+                        <input type="text" name="rut" class="form-control" placeholder="Buscar por RUT" value="{{ request.GET.rut }}" autocomplete="off">
+                      </div>
+                      <div class="col-md-3 alinear-input">
+                        <input type="text" name="nombres" class="form-control" placeholder="Buscar por Nombre" value="{{ request.GET.nombres }}" autocomplete="off">
+                      </div>
+                      <div class="col-md-3 alinear-input">
+                        <input type="text" name="correo_electronico" class="form-control" placeholder="Buscar por Correo" value="{{ request.GET.correo_electronico }}" autocomplete="off">
+                      </div>
+                      <div class="col-md-3 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary me-2"><i class="fas fa-search"></i> Buscar</button>
+                        <a href="{% url 'ver_conserjes' %}" class="btn btn-secondary"><i class="fas fa-eraser"></i> Limpiar</a>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+         
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">RUT</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Nombre completo</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Teléfono</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Correo Electrónico</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Dirección</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">fecha Ingreso</th>
+                  <th class="text-secondary opacity-7">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in empleadosObj %}
+                <tr>
+                  <td>
+                    <div class="d-flex px-2 py-1">
+                      <div class="d-flex flex-column justify-content-center">
+                        <p class="text-xs text-secondary mb-0">{{ item.rut }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <p class="text-xs text-secondary mb-0">{{ item.nombres }} {{ item.apellido_paterno }} {{ item.apellido_materno }}</p>
+                  </td>
+                  <td>
+                    <p class="text-xs text-secondary mb-0">{{ item.telefono }}</p>
+                  </td>
+                  <td>
+                    <p class="text-xs text-secondary mb-0">{{ item.correo_electronico }}</p>
+                  </td>
+                  <td>
+                    <p class="text-xs text-secondary mb-0">{{ item.direccion }}</p>
+                  </td>
+                  <td>
+                    <p class="text-xs text-secondary mb-0">{{ item.fecha_ingreso|date:"Y-m-d"  }}</p>
+                  </td>
+                  <td class="align-middle">
+                    <input type="hidden" name="id" value="{{ item.id }}">
+                   
+                    <a class="btn btn-warning btn-sm" style="font-weight: 100;" title="Modificar Empleado" href="{% url 'editar_conserje' item.id %}">
+                      <i class="fas fa-edit"></i>
+                  </a>
+                    <a href="#" class="btn btn-danger btn-sm" style="font-weight: 100;" title="Eliminar Empleado" onclick="confirmDelete('{% url 'eliminar_conserje' item.id %}')">
+                      <i class="fas fa-trash"></i>
+                  </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include "includes/footer.html" %}
+
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}{% endblock javascripts %}
