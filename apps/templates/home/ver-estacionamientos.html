@@ -1,0 +1,116 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Listado de Estacionamientos {% endblock title %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="custom-card">
+        <div class="custom-card-header w-100 text-center">
+          <h6>ESTACIONAMIENTOS REGISTRADOS</h6>
+        </div>
+
+        <!-- Card para el formulario de búsqueda -->
+        <div class="custom-card-body">
+          <!-- <div class="row">
+            <div class="col-md-12 d-flex justify-content-start" style="margin-bottom: -2rem;">
+              <a class="btn btn-custom me-2" href="{% url 'crear_estacionamiento' %}">Nuevo</a>
+              
+            </div>
+          </div> -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="custom-card">
+                <div class="custom-card-header">
+                  <h6>Filtros</h6>
+                </div>
+                <div class="custom-card-body">
+                  <form method="GET" action="{% url 'ver_estacionamientos' %}">
+                    <div class="d-flex flex-wrap align-items-center">
+                      <select name="numero_estacionamiento" class="form-control me-2 filter-input alinear-input">
+                        <option value="">Número</option>
+                        {% for numero in numeros_estacionamiento %}
+                            <option value="{{ numero.nombre }}" {% if request.GET.numero_estacionamiento == numero.nombre %}selected{% endif %}>{{ numero.nombre }}</option>
+                        {% endfor %}
+                    </select>
+
+                      <select name="ubicacion" class="form-control me-2 filter-input alinear-input">
+                        <option value="">Ubicación</option>
+                        {% for ubicacion in ubicaciones %}
+                          <option value="{{ ubicacion.nombre }}" {% if request.GET.ubicacion == ubicacion.nombre %}selected{% endif %}>{{ ubicacion.nombre }}</option>
+                        {% endfor %}
+                      </select>
+                      <select name="tipo_estacionamiento" class="form-control me-2 filter-input alinear-input">
+                        <option value="">Tipo</option>
+                        {% for tipo in tipos_estacionamiento %}
+                          <option value="{{ tipo.nombre }}" {% if request.GET.tipo_estacionamiento == tipo.nombre %}selected{% endif %}>{{ tipo.nombre }}</option>
+                        {% endfor %}
+                      </select>
+                      <select name="estado_estacionamiento" class="form-control me-2 filter-input alinear-input">
+                        <option value="">Estado</option>
+                        {% for estado in estados_estacionamiento %}
+                          <option value="{{ estado.nombre }}" {% if request.GET.estado_estacionamiento == estado.nombre %}selected{% endif %}>{{ estado.nombre }}</option>
+                        {% endfor %}
+                      </select>
+                      <button type="submit" class="btn btn-primary me-2 filter-button"><i class="fas fa-search"></i> Buscar</button>
+                      <a href="{% url 'ver_estacionamientos' %}" class="btn btn-secondary filter-button">
+                        <i class="fas fa-eraser"></i> Limpiar
+                      </a>
+                    </div>
+                  </form>
+   
+         
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Número</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Ubicación</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Tipo</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Estado</th>
+                  <!-- <th class="text-secondary opacity-7">Acción</th> -->
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in estacionamientosObj %}
+                <tr>
+                  <td>
+                    <div class="d-flex px-2 py-1">
+                      <div class="d-flex flex-column justify-content-center">
+                        <p class="text-sm text-secondary mb-0">{{ item.numero_estacionamiento.nombre }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <p class="text-sm text-secondary mb-0">{{ item.ubicacion.nombre }}</p>
+                  </td>
+                  <td>
+                    <p class="text-sm text-secondary mb-0">{{ item.tipo_estacionamiento.nombre }}</p>
+                  </td>
+                  <td>
+                    <p class="text-sm text-secondary mb-0">{{ item.estado_estacionamiento.nombre }}</p>
+                  </td>
+                  <!-- <td class="align-middle">
+                    <input type="hidden" name="id" value="{{ item.id }}">
+                    <a class="btn btn-info btn-sm" href="{% url 'editar_estacionamiento' item.id %}">Editar</a>
+                  </td> -->
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include "includes/footer.html" %}
+
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}{% endblock javascripts %}

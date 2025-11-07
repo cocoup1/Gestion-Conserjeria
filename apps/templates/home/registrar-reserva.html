@@ -1,0 +1,298 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Nueva Reserva {% endblock title %}
+
+{% block stylesheets %}{% endblock stylesheets %}
+
+<style>
+    .icon-button {
+        background-color: transparent;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    .icon-button i {
+        color: yellow; /* Color del ícono */
+        font-size: 2rem; /* Tamaño del ícono */
+    }
+</style>
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="custom-card mb-4">
+        
+        <div class="d-flex justify-content-between align-items-center custom-card-header">
+            <a href="{% url 'ver_reservas' %}" class="btn-icon-only" title="Volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h6 class="text-center w-100">NUEVA RESERVA</h6>
+        </div>
+        <div class="custom-card-body">
+            {% include "home/form-reserva-nueva.html" %}
+        </div>
+    </div>
+    {% include "includes/footer.html" %}
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="residentesModal" tabindex="-1" role="dialog" aria-labelledby="residentesModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="w-100 text-center" id="residentesModalLabel">SELECCIONAR RESIDENTE</h6>
+                
+            </div>
+            <div class="modal-body">
+                <select id="residentesDropdown" class="form-control">
+                    <option value="">Seleccione</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="seleccionarResidenteBtn">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+      <!-- Modal de Estacionamientos -->
+      <div class="modal fade" id="estacionamientosModal" tabindex="-1" aria-labelledby="estacionamientosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+           
+            {% include "home/ver-estacionamientos-disponibles.html" %}
+           
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock content %}
+
+{% block javascripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
+  <style>
+    .flatpickr-calendar {
+      max-width: 12rem !important; 
+      left: 834.469px !important;
+      
+    }
+   
+  </style>
+
+<script>
+
+$(document).ready(function() 
+{
+        $('#estacionamientosModal').on('hidden.bs.modal', function () {
+            // Deshabilitar campos específicos
+            document.getElementById('id_patente_vehiculo').disabled = false;
+            document.getElementById('id_descripcion_vehiculo').disabled = false;
+            document.getElementById('id_fecha_llegada_visita').disabled = false;
+        });
+});
+document.addEventListener('DOMContentLoaded', function() 
+{
+      flatpickr("#tiempo_permanencia", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        defaultHour: 1,
+        minuteIncrement: 60,
+        minTime: "01:00",
+        maxTime: "08:00",
+        onReady: function(selectedDates, dateStr, instance) {
+          instance.set({ minute: 0 }); // Set the minute to 0
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+          instance.set({ minute: 0 }); // Set the minute to 0
+        }
+      });
+    });
+    // CARGA LOS ESTACIONAMIENTOS EN EL MODAL
+document.addEventListener('DOMContentLoaded', function() 
+{
+    const estacionamientosBody = document.getElementById('estacionamientos-body');
+    const formulario = document.getElementById('editarReservaEstacionamientoForm');
+    const estacionamientoInput = document.getElementById('estacionamiento');
+   
+    // Deshabilito algunos campos del vehiculo.
+    document.getElementById('id_patente_vehiculo').disabled = true;
+    document.getElementById('id_descripcion_vehiculo').disabled = true;
+    document.getElementById('id_fecha_llegada_visita').disabled = true;
+
+    async function cargarEstacionamientos() {
+        fetch('/estacionamientos-disponibles/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.estacionamientos) 
+            {
+                const tableBody = document.getElementById('estacionamientos-body');
+                tableBody.innerHTML = ''; // Limpiar el contenido anterior
+
+                data.estacionamientos.forEach(estacionamiento => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-id', estacionamiento.id);
+                    row.innerHTML = `
+                        <td>${estacionamiento.numero}</td>
+                        <td>${estacionamiento.ubicacion}</td>
+                        <td>${estacionamiento.tipo}</td>
+                    `;
+                    
+                    row.addEventListener('click', function() {
+                        seleccionarEstacionamiento(estacionamiento.id, estacionamiento.numero, estacionamiento.ubicacion);
+
+                    });
+                    tableBody.appendChild(row);
+                });
+
+            } else {
+                alert('No hay estacionamientos disponibles.');
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar estacionamientos:', error);
+            
+        });
+    }
+
+
+
+    cargarEstacionamientos();
+});
+
+document.addEventListener('submit', function(event) {
+       
+        const llaveEstacionamientoInput = document.getElementById('llave_estacionamiento');
+    
+        if (!llaveEstacionamientoInput) {
+            return; // Detener el flujo si el elemento no existe
+        }
+
+        const llaveEstacionamiento = llaveEstacionamientoInput.value;
+        estacionamientoInput.value = llaveEstacionamiento;
+    });
+
+function seleccionarEstacionamiento(id, numero, ubicacion) {
+        document.getElementById('estacionamiento').value = id;
+        document.getElementById('numero_estacionamiento').value = numero;
+        document.getElementById('ubicacion_estacionamiento').value = ubicacion;
+        $('#estacionamientosModal').modal('hide');
+    }
+
+// al hacer click en el boton de buscar propiedad
+document.getElementById('buscarPropiedadForm').addEventListener('submit', function(event)
+{
+         event.preventDefault();
+        var numeroPropiedad = document.getElementById('numero_propiedad').value;
+        
+        fetch(`/obtener-datos-propiedad/?numero_propiedad=${numeroPropiedad}`)
+        .then(response => response.json())
+        .then(data => { 
+            
+            if (data.id && data.numero_propiedad && data.piso && data.estado) {
+                console.log("datos propiedad :::::::::::::::::::::::: ",data);
+                actualizarPropiedad(data.id);
+                document.getElementById('propiedad').value = data.id;
+                document.getElementById('numero_propiedad_label').textContent = data.numero_propiedad;
+                document.getElementById('piso_propiedad').textContent = data.piso;
+                
+                const errorContainer = document.getElementById("id_residente2_error");
+                errorContainer.style.display = "none"; // Ocultar el error del residente.
+
+                const estadoPropiedad = document.getElementById('estado_propiedad');
+                if (estadoPropiedad) {
+                    estadoPropiedad.textContent = data.estado;
+                }
+            } else {
+                alert(data.error);
+            }
+        });
+        
+        fetch(`/buscar-residentes/?numero_propiedad=${numeroPropiedad}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.residentes) {
+                    var dropdown = document.getElementById('residentesDropdown');
+                    dropdown.innerHTML = '<option value="">Seleccione</option>';
+                    data.residentes.forEach(function(residente) {
+                        var option = document.createElement('option');
+                        option.value = residente.id;
+                        option.textContent = residente.nombre;
+                        dropdown.appendChild(option);
+                    });
+                    $('#residentesModal').modal('show');
+                } else {
+                    alert(data.error);
+                }
+            });
+
+
+    });
+    // FUNCION QUE GATILLA DESPUES DE SELECCIONAR UN RESIDENTE DEL MODAL
+
+// cunado selecciono un residente del modal de residentes
+document.getElementById('seleccionarResidenteBtn').addEventListener('click', function() 
+{
+
+        var dropdown = document.getElementById('residentesDropdown');
+        var selectedResidenteId = dropdown.value;
+        var datosResidenteDiv = document.getElementById('datosResidente');
+        
+        if (selectedResidenteId) {
+            // Actualizar los datos del residente
+            actualizarDatosResidente(selectedResidenteId);
+            
+            $('#residentesModal').modal('hide');
+            
+            datosResidenteDiv.style.display = 'block';
+            
+            // Agregar clase para iniciar la animación de desvanecimiento
+            setTimeout(function() {
+                datosResidenteDiv.classList.add('fadeIn'); // Esto aplicará la transición CSS
+            }, 10);  // Corto retraso para asegurar que la propiedad 'display' se aplique primero
+        } else {
+            alert('Seleccione un residente');
+            datosResidenteDiv.style.display = 'none';
+        }
+    });
+
+
+function actualizarDatosResidente(residenteId)
+ {
+    if (residenteId) {
+            fetch(`/obtener-datos-residente/?residente_id=${residenteId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.nombre_completo && data.telefono) {
+                        console.log("data :::::::::::::::::::::::: ",data);
+                        
+                        document.getElementById('id_residente2').value = data.id;
+                        document.getElementById('nombre_completo_residente').innerHTML = data.nombre_completo;
+                        document.getElementById('telefono_residente').innerHTML = data.telefono;
+                        document.getElementById('id_residente').value = data.id;
+
+
+                    } else {
+                        alert(data.error);
+                    }
+                });
+        }
+    }
+// al seleccionar una propiedad, guardo el id de la propiedad en un input oculto
+function actualizarPropiedad(id) {
+        document.getElementById("id_propiedad").value = id;
+    }
+
+
+</script>
+{% endblock javascripts %}

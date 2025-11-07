@@ -1,0 +1,171 @@
+<!-- Fila para los Datos del Residente -->
+<div class="row" id="datosResidente">
+    <div class="col-md-12">
+        <div class="custom-card mb-1">
+            <div class="custom-card-header">
+                <h6>Datos del Residente</h6>
+            </div>
+            <div class="custom-card-body">
+                {% if residente %}
+                <div class="row">
+                    <div class="col-md-12 d-flex flex-wrap align-items-center">
+                        
+                        <div class="form-group me-4">
+                            <label for="nombre_completo_residente" class="form-label">Residente:</label>
+                            <div id="nombre_completo_residente" class="d-inline-block p-2 rounded bg-light" style="font-size: small;">
+                                {{ residente.nombres }} {{ residente.apellido_paterno }} {{ residente.apellido_materno }}
+                            </div>
+                          </div>
+                          <div class="form-group me-4">
+                            <label for="telefono_residente" class="form-label">N° Contacto: </label>
+                            <div id="telefono_residente" class="d-inline-block p-2 rounded bg-light" style="font-size: small;">
+                              {{ residente.telefono }}</div>
+      
+                          </div>
+                          <div class="form-group me-4">
+                            <label for="numero_propiedad_label" class="form-label">Número Propiedad: </label>
+                            <div id="numero_propiedad_label" class="d-inline-block p-2 rounded bg-light" style="font-size: small;">
+                              {{ propiedad.numero }}</div>
+                            <input type="hidden" id="propiedad" name="propiedad" value="{{ propiedad.id }}">
+                          </div>
+                          
+                          <div class="form-group">
+                            <label for="piso_propiedad" class="form-label">Piso: </label>
+                            <div id="piso_propiedad" class="d-inline-block p-2 rounded bg-light" style="font-size: small;">
+                              {{ propiedad.piso }}</div>
+                          </div>
+                    </div>
+                </div>
+                {% else %}
+                    <p class="text-muted">No hay un residente asociado a esta propiedad.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Formulario de Edición de Reserva -->
+<form enctype="multipart/form-data" id="editarReservaEstacionamientoForm" method="post" autocomplete="off" novalidate>
+    {% csrf_token %}
+
+    <!-- Acordeón Horizontal para Secciones -->
+    <div class="horizontal-accordion">
+        <!-- Sección de Visitas -->
+        <div class="accordion-item">
+            <div class="accordion-header" id="headingVisit">
+                <!-- <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVisit" aria-expanded="true" aria-controls="collapseVisit">
+                    Datos de Visita
+                </button> -->
+                <button class="accordion-button disabled" type="button" aria-expanded="true" aria-controls="collapseVisit">
+                    Datos de Visita
+                </button>
+            </div>
+            <div id="collapseVisit" class="accordion-collapse collapse show" aria-labelledby="headingVisit" data-bs-parent="#formAccordion">
+                <div class="accordion-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.rut_visita.id_for_label }}" class="form-label">{{ formulario.rut_visita.label }}</label>
+                            {{ formulario.rut_visita }}
+                        </div>
+                        
+                        </div>
+                        <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.nombre_visita.id_for_label }}" class="form-label">{{ formulario.nombre_visita.label }}</label>
+                            {{ formulario.nombre_visita }}
+                        </div>
+                        
+                        </div>
+                        <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.apellido_paterno_visita.id_for_label }}" class="form-label">{{ formulario.apellido_paterno_visita.label }}</label>
+                            {{ formulario.apellido_paterno_visita }}
+                        </div>        
+                        </div>
+                        <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.apellido_materno_visita.id_for_label }}" class="form-label">{{ formulario.apellido_materno_visita.label }}</label>
+                            {{ formulario.apellido_materno_visita }}
+                        </div>
+                        </div>
+                        <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.telefono_visita.id_for_label }}" class="form-label">{{ formulario.telefono_visita.label }}</label>
+                            {{ formulario.telefono_visita }}
+                        </div>
+                        </div>
+                        <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ formulario.relacion_residente.id_for_label }}" class="form-label">{{ formulario.relacion_residente.label }}</label>
+                            {{ formulario.relacion_residente }}
+                        </div>
+                        </div>
+                        <div class="col-md-6 d-none">
+                        <div class="form-group">
+                            <label for="{{ formulario.residente.id_for_label }}" class="form-label">{{ formulario.residente.label }}</label>
+                            {{ formulario.residente }}
+                        </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Datos del Vehículo -->
+        <div class="accordion-item">
+            <div class="accordion-header" id="headingVehicle">
+                <button class="accordion-button disabled" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVehicle" aria-expanded="true" aria-controls="collapseVehicle">
+                    Datos del Vehículo
+                </button>
+
+            </div>
+            <div id="collapseVehicle" class="accordion-collapse collapse show" aria-labelledby="headingVehicle" data-bs-parent="#formAccordion">
+                <div class="accordion-body">
+                    <div class="row">
+                        {% for campo in formulario %}
+                            {% if campo.name in 'patente_vehiculo descripcion_vehiculo fecha_llegada_visita fecha_fin_visita fecha_llegada_visita_confirmada tiempo_permanencia' %}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                <label for="{{ campo.id_for_label }}" class="form-label">{{ campo.label }}</label>
+                                {{ campo }}
+                                </div>
+                                
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                         <!-- Campo Número Estacionamiento -->
+                         <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="numero_estacionamiento" class="form-label">Número Estacionamiento</label>
+                                <input type="text" id="numero_estacionamiento" name="numero_estacionamiento" 
+                                class="form-control" value="{{ numero_estacionamiento }}" readonly >
+                            </div>
+                        </div>
+                        <!-- Campo Ubicación Estacionamiento -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ubicacion_estacionamiento" class="form-label">Ubicación Estacionamiento</label>
+                                <input type="text" id="ubicacion_estacionamiento" name="ubicacion_estacionamiento"
+                                 value="{{ ubicacion_estacionamiento }}" class="form-control" readonly>
+                                <input type="hidden" id="llave_estacionamiento" name="llave_estacionamiento" value="{{ llave_estacionamiento }}">
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campo ocultos para enviar al formulario -->
+    <input type="hidden" id="empleado" name="empleado" value="{{ request.session.empleado_id }}">
+    <input type="hidden" id="residente" name="residente" value="">
+    <input type="hidden" id="estacionamiento" name="estacionamiento">
+    <div class="d-none">
+        {{ formulario.propiedad }}
+    </div>
+
+</form>

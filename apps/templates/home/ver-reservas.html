@@ -1,0 +1,229 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Reservas {% endblock title %}
+
+
+
+{% block content %}
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="custom-card">
+        
+        <div class="text-center custom-card-header">
+          <h6>VISITAS Y RESERVAS ESTACIONAMIENTO</h6>
+        </div>
+
+        <!-- Card para el formulario de búsqueda -->
+        <div class="custom-card-body">
+          <div class="row">
+            <div class="col-md-12 d-flex justify-content-start" style="margin-bottom: -0.8rem;">
+              <a class="btn btn-custom me-2" href="{% url 'crear_reserva' %}">Nueva Reserva</a>              
+          
+              <!-- <a class="btn btn-pdf" href="{% url 'exportar_reservas_pdf' %}" target="_blank"><i class="fas fa-download"></i> PDF</a> -->
+          
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="custom-card">
+                <div class="custom-card-header">
+                  <h6>Filtros</h6>
+                </div>
+                  <div class="custom-card-body">
+                    <form method="GET" action="{% url 'ver_reservas' %}">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <input type="text" name="rut_visita" class="form-control" placeholder="Buscar por RUT Visita" value="{{ request.GET.rut_visita }}">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="patente_vehiculo" class="form-control" placeholder="Buscar por Patente" value="{{ request.GET.patente_vehiculo }}">
+                            </div>
+                            <div class="col-md-3">
+                                <select name="estado_estacionamiento" class="form-control">
+                                    <option value="">Seleccione Estado</option>
+                                    {% for estado in estados_estacionamiento %}
+                                        <option value="{{ estado }}" {% if request.GET.estado_estacionamiento == estado %}selected{% endif %}>{{ estado }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary me-2"><i class="fas fa-search"></i> Buscar</button>
+                                <a href="{% url 'ver_reservas' %}" class="btn btn-secondary"><i class="fas fa-eraser"></i> Limpiar</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">RUT</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Nombre</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Patente</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Ubicación</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">N° Est.</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Fecha LLegada</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Fecha Salida</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Estado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for reserva in reservasObj %}
+                <tr>
+                  <td>
+                    <div class="d-flex px-2 py-1">
+                      <div class="d-flex flex-column justify-content-center">
+                        <p class="text-sm text-secondary mb-0">{{ reserva.rut_visita }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <p class="text-sm text-secondary mb-0">{{ reserva.nombre_completo }}</p>
+                  </td>
+                  
+                  <td>
+                    <p class="text-sm text-secondary mb-0">{{ reserva.patente_vehiculo }}</p>
+                  </td>
+                  <td>
+                    <p class="text-sm text-secondary mb-0">{{ reserva.ubicacion_estacionamiento }}</p>
+                  </td>
+                  <td>
+                    <p class="text-sm text-secondary mb-0">{{ reserva.numero_estacionamiento }}</p>
+                  </td>
+                  <td>
+                    <p class="text-sm text-secondary mb-0">{{ reserva.fecha_llegada_visita|date:"Y-m-d H:i:s"  }}</p>
+                  </td>
+                  <td>
+                    <p class="text-sm text-secondary mb-0">{{ reserva.fecha_fin_visita|date:"Y-m-d H:i:s"  }}</p>
+                  </td>
+                  <td>
+                    <p class="text-xs text-secondary mb-0"><strong>{{ reserva.estado_estacionamiento }}</strong></p>
+                  </td>
+                  
+                <td class="align-middle text-center">
+                  <input type="hidden" name="id" value="{{ reserva.id }}">
+                  
+                  {% if reserva.id %}
+                      {% if reserva.estado_estacionamiento == 'Ocupado' %}
+                          <button class="btn btn-success btn-sm" disabled style="font-weight: 100;" title="Confirmado">
+                              <i class="fas fa-check"></i>
+                          </button>
+                          <button class="btn btn-warning btn-sm" disabled style="font-weight: 100;" title="Modificar">
+                              <i class="fas fa-edit"></i>
+                          </button>            
+                          <a href="#" class="btn btn-primary btn-sm" style="font-weight: 100;" title="Finalizar Reserva" onclick="confirmDelete('{% url 'finalizar_reserva' reserva.id %}')">
+                            <i class="fas fa-flag-checkered"></i>
+                          </a>
+
+                      {% elif reserva.estado_estacionamiento == 'Finalizado' %}
+                          <button class="btn btn-success btn-sm" style="font-weight: 100;" disabled title="Confirmado">
+                              <i class="fas fa-check"></i>
+                          </button>
+                          <button class="btn btn-warning btn-sm" style="font-weight: 100;" disabled title="Modificar">
+                              <i class="fas fa-edit"></i>
+                          </button>
+                          <button class="btn btn-primary btn-sm" disabled style="font-weight: 100;" title="Finalizar">
+                            <strong><i class="fas fa-flag-checkered"></i></strong>
+                        </button>
+
+                      <!-- CUANDO EL REGISTRO ES DE UNA VISITA SIN ESTACIONAMIENTO -->
+                      {% elif reserva.estado_estacionamiento == 'Sin estacionamiento' %}
+
+                          {% if reserva.fecha_llegada_visita is None or reserva.fecha_llegada_visita == "" %}
+                            <!-- Botón "Confirmar Visita" habilitado -->
+                            <a href="#" 
+                              class="btn btn-success btn-sm" 
+                              style="font-weight: 100;" 
+                              title="Confirmar Visita" 
+                              onclick="confirmAction('{% url 'confirmar_reserva_visita' reserva.id %}')">
+                              <i class="fas fa-check"></i>
+                            </a>
+                            <!-- Botón "Finalizar Visita" deshabilitado -->
+                            <button class="btn btn-primary btn-sm" 
+                                    disabled 
+                                    style="font-weight: 100;" 
+                                    title="Finalizar Visita">
+                              <i class="fas fa-flag-checkered"></i>
+                            </button>
+
+                          {% elif reserva.fecha_llegada_visita and reserva.fecha_fin_visita %}
+                            <!-- Ambos botones deshabilitados cuando la visita ya fue finalizada -->
+                            <button class="btn btn-success btn-sm" 
+                                    style="font-weight: 100;" 
+                                    disabled 
+                                    title="Confirmado">
+                              <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-primary btn-sm" 
+                                    disabled 
+                                    style="font-weight: 100;" 
+                                    title="Visita Finalizada">
+                              <i class="fas fa-flag-checkered"></i>
+                            </button>
+
+                          {% else %}
+                            <!-- Botón "Confirmar" deshabilitado y "Finalizar Visita" habilitado -->
+                            <button class="btn btn-success btn-sm" 
+                                    style="font-weight: 100;" 
+                                    disabled 
+                                    title="Confirmado">
+                              <i class="fas fa-check"></i>
+                            </button>
+                            <a href="#" 
+                              class="btn btn-primary btn-sm" 
+                              style="font-weight: 100;" 
+                              title="Finalizar Visita" 
+                              onclick="confirmDelete('{% url 'finalizar_reserva_visita' reserva.id %}')">
+                              <i class="fas fa-flag-checkered"></i>
+                            </a>
+                          {% endif %}
+
+
+
+                      {% else %}
+                          <a href="#" class="btn btn-success btn-sm" style="font-weight: 100;" title="Confirmar Reserva" onclick="confirmAction('{% url 'confirmar_reserva' reserva.id %}')">
+                              <i class="fas fa-check"></i>
+                          </a>
+                          <a class="btn btn-warning btn-sm" style="font-weight: 100;" title="Modificar" href="{% url 'editar_reserva' reserva.id %}">
+                              <i class="fas fa-edit"></i>
+                          </a>
+                          <a href="#" class="btn btn-primary btn-sm" style="font-weight: 100;" title="Finalizar Reserva" onclick="confirmDelete('{% url 'finalizar_reserva' reserva.id %}')">
+                            <i class="fas fa-flag-checkered"></i>
+                         </a>
+                         
+                      {% endif %}
+                      <a class="btn btn-info btn-sm" style="font-weight: 100;" title="Ver Detalle" href="{% url 'detalle_reserva' reserva.id %}">
+                          <i class="fas fa-info-circle"></i>
+                      </a>
+                      <!-- <a href="#" class="btn btn-danger btn-sm" style="font-weight: 100;" title="Eliminar" onclick="confirmDelete('{% url 'eliminar_reserva' reserva.id %}')">
+                        <i class="fas fa-trash"></i>
+                    </a> -->
+                  {% else %}
+                      <span>No disponible</span>
+                  {% endif %}
+              </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include "includes/footer.html" %}
+
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}{% endblock javascripts %}

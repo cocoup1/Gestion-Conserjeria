@@ -1,0 +1,318 @@
+          
+
+<form enctype="multipart/form-data" id="personForm" method="post" autocomplete="off" novalidate>
+  {% csrf_token %}
+  
+  <div class="row justify-content-center">
+      <div class="col-md-11">
+
+          <div class="d-flex justify-content-between align-items-center custom-card-header">
+            <a href="{% url 'ver_conserjes' %}" class="btn-icon-only" title="Volver">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h6 class="text-center w-100">NUEVO EMPLEADO</h6>
+        </div>
+          <div class="row">
+            <!-- RUT -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_rut" class="form-label">RUT</label>
+                    {{ formulario.rut }}
+                </div>
+                {% if formulario.rut.errors %}
+                    <div class="text-danger small">{{ formulario.rut.errors }}</div>
+                {% endif %}
+                <div id="rut_error2" class="text-danger small"></div>
+            </div>
+        
+            <!-- Nombres -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_nombres" class="form-label">Nombres</label>
+                    {{ formulario.nombres }}
+                </div>
+                {% if formulario.nombres.errors %}
+                    <div class="text-danger small">{{ formulario.nombres.errors }}</div>
+                {% endif %}
+                <div id="nombres_error2" class="text-danger small"></div>
+            </div>
+        
+            <!-- Apellido Paterno -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_apellido_paterno" class="form-label">Apellido Paterno</label>
+                    {{ formulario.apellido_paterno }}
+                </div>
+                {% if formulario.apellido_paterno.errors %}
+                    <div class="text-danger small">{{ formulario.apellido_paterno.errors }}</div>
+                {% endif %}
+                <div id="apellido_paterno_error2" class="text-danger small"></div>
+            </div>
+        
+            <!-- Apellido Materno -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_apellido_materno" class="form-label">Apellido Materno</label>
+                    {{ formulario.apellido_materno }}
+                </div>
+                {% if formulario.apellido_materno.errors %}
+                    <div class="text-danger small">{{ formulario.apellido_materno.errors }}</div>
+                {% endif %}
+                <div id="apellido_materno_error2" class="text-danger small"></div>
+            </div>
+        
+            <!-- Dirección -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_direccion" class="form-label">Dirección</label>
+                    {{ formulario.direccion }}
+                </div>
+                {% if formulario.direccion.errors %}
+                    <div class="text-danger small">{{ formulario.direccion.errors }}</div>
+                {% endif %}
+                <div id="direccion_error2" class="text-danger small"></div>
+            </div>
+        
+            <!-- Teléfono -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_telefono" class="form-label">Teléfono</label>
+                    {{ formulario.telefono }}
+                </div>
+                {% if formulario.telefono.errors %}
+                    <div class="text-danger small">{{ formulario.telefono.errors }}</div>
+                {% endif %}
+                <div id="telefono_error2" class="text-danger small"></div>
+            </div>
+        
+            <!-- Correo Electrónico -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_correo_electronico" class="form-label">Correo Electrónico</label>
+                    {{ formulario.correo_electronico }}
+                </div>
+                {% if formulario.correo_electronico.errors %}
+                    <div class="text-danger small">{{ formulario.correo_electronico.errors }}</div>
+                {% endif %}
+                <div id="correo_electronico_error2" class="text-danger small"></div>
+            </div>
+        
+            <!-- Sexo -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_sexo" class="form-label">Sexo</label>
+                    <div>
+                        {% for subcampo in formulario.sexo %}
+                            <div class="form-check form-check-inline">
+                                {{ subcampo.tag }}
+                                <label class="form-check-label" for="{{ subcampo.id_for_label }}">{{ subcampo.choice_label }}</label>
+                            </div>
+                        {% endfor %}                     
+                    </div>
+                </div>
+                {% if formulario.sexo.errors %}
+                    <div class="text-danger small">{{ formulario.sexo.errors }}</div>
+                {% endif %}
+                <div id="sexo_error2" class="text-danger small"></div>  
+            </div>
+        
+            <!-- Fecha de Ingreso -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_fecha_ingreso" class="form-label">Fecha de Ingreso</label>
+                    {{ formulario.fecha_ingreso }}
+                </div>
+                {% if formulario.fecha_ingreso.errors %}
+                    <div class="text-danger small">{{ formulario.fecha_ingreso.errors }}</div>
+                {% endif %}
+                <div id="fecha_ingreso_error2" class="text-danger small"></div>  
+            </div>
+        
+            <!-- Región -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_region" class="form-label">Región</label>
+                    {{ formulario.id_region }}
+                </div>
+                {% if formulario.id_region.errors %}
+                    <div class="text-danger small">{{ formulario.id_region.errors }}</div>
+                {% endif %}
+                <div id="region_error2" class="text-danger small"></div>
+            </div>
+        
+            <!-- Comuna -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_comuna" class="form-label">Comuna</label>
+                    {{ formulario.id_comuna }}
+                </div>
+                {% if formulario.id_comuna.errors %}
+                    <div class="text-danger small">{{ formulario.id_comuna.errors }}</div>
+                {% endif %}
+                <div id="comuna_error2" class="text-danger small"></div>
+            </div>
+        
+            <!-- Rol -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_rol" class="form-label">Rol</label>
+                    {{ formulario.id_rol }}
+                </div>
+                {% if formulario.id_rol.errors %}
+                    <div class="text-danger small">{{ formulario.id_rol.errors }}</div>
+                {% endif %}
+                <div id="rol_error2" class="text-danger small"></div>
+            </div>
+        
+            <!-- Clave Temporal -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_clave_temporal" class="form-label">Clave Temporal</label>
+                    {{ formulario.clave_temporal }}
+                </div>
+                {% if formulario.clave_temporal.errors %}
+                    <div class="text-danger small">{{ formulario.clave_temporal.errors }}</div>
+                {% endif %}
+                <div id="clave_temporal_error2" class="text-danger small"></div>
+            </div>
+        </div>
+        
+
+          {% if form.errors %}
+          <div class="alert alert-danger">
+              <ul>
+                  {% for field, errors in form.errors.items %}
+                      <li>{{ field }}: {{ errors|striptags }}</li>
+                  {% endfor %}
+              </ul>
+          </div>
+          {% endif %}
+          {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                  {{ form.non_field_errors }}
+              </div>
+          {% endif %}
+
+        
+
+          <div class="row" style="margin-top: 1rem !important;">
+              <div class="col-md-6 d-grid mb-3">
+                  <input type="submit" class="btn btn-success" value="Guardar">
+              </div>
+              <div class="col-md-6 d-grid mb-3">
+                  <button type="button" class="btn btn-secondary" onclick="limpiarCampos()">Limpiar</button>
+              </div>
+          </div>
+      </div>
+  </div>
+</form>
+
+{% load static %}
+<script src="{% static 'assets/js/rutValidator.js' %}"></script>
+<script src="{% static 'assets/js/utils.js' %}"></script>
+
+<script>
+
+function limpiarCampos() {
+    // Limpiar campos de tipo input (text, email, password, etc.)
+    document.querySelectorAll('input').forEach((campo) => {
+        if (campo.type !== 'checkbox' && campo.type !== 'radio' && campo.type !== 'submit') {
+            campo.value = ''; // Limpiar el valor de los campos de texto
+        }
+        if (campo.type === 'password') {
+            campo.value = ''; // Limpiar el valor de los campos password
+        }
+    });
+
+    // Limpiar campos de tipo checkbox (deseleccionarlos)
+    document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach((campo) => {
+        campo.checked = false; // Deseleccionar los checkboxes o radios
+    });
+
+    // Limpiar campos de tipo select (restablecer al primer valor por defecto o vacío)
+    document.querySelectorAll('select').forEach((campo) => {
+        campo.selectedIndex = 0; // Restablecer al primer valor de la lista
+    });
+
+        // Limpiar los mensajes de error (divs con clase "text-danger")
+    document.querySelectorAll('.text-danger').forEach((errorDiv) => {
+        errorDiv.innerHTML = ''; // Limpiar el contenido de los mensajes de error
+    });
+}
+
+function validarCamposVaciosFormularioEmpleado()
+{
+    // Obtener los elementos del formulario
+    var rut = document.getElementById('id_rut');
+    var nombres = document.getElementById('id_nombres');
+    var apellido_paterno = document.getElementById('id_apellido_paterno');
+    var apellido_materno = document.getElementById('id_apellido_materno');
+    var direccion = document.getElementById('id_direccion');
+    var telefono = document.getElementById('id_telefono');
+    var correo_electronico = document.getElementById('id_correo_electronico');
+    var sexo = document.querySelector('input[name="sexo"]:checked'); // Para campos tipo radio
+    var fecha_ingreso = document.getElementById('id_fecha_ingreso');
+    var region = document.getElementById('id_region');
+    var comuna = document.getElementById('id_comuna');
+    var role = document.getElementById('id_rol');
+    var clave_temporal = document.getElementById('id_clave_temporal');
+
+    // Limpiar mensajes de error previos
+    document.querySelectorAll('.text-danger.small').forEach(function (el) {
+        el.innerHTML = '';
+    });
+
+    // Bandera para validar
+    var isValid = true;
+
+    // Función auxiliar para validar un campo
+    function validarCampo(campo, errorId, mensajeError) {
+        if (!campo || campo.value.trim() === '') {
+            document.getElementById(errorId).innerText = mensajeError;
+            isValid = false;
+        }
+    }
+
+    // Validar cada campo
+    validarCampo(rut, 'rut_error2', 'Este campo es obligatorio.');
+    validarCampo(nombres, 'nombres_error2', 'Este campo es obligatorio.');
+    validarCampo(apellido_paterno, 'apellido_paterno_error2', 'Este campo es obligatorio.');
+    validarCampo(apellido_materno, 'apellido_materno_error2', 'Este campo es obligatorio.');
+    validarCampo(direccion, 'direccion_error2', 'Este campo es obligatorio.');
+    validarCampo(telefono, 'telefono_error2', 'Este campo es obligatorio.');
+    validarCampo(correo_electronico, 'correo_electronico_error2', 'Este campo es obligatorio.');
+    if (!sexo) {
+        document.getElementById('sexo_error2').innerText = 'Este campo es obligatorio.';
+        isValid = false;
+    }
+    validarCampo(fecha_ingreso, 'fecha_ingreso_error2', 'Este campo es obligatorio.');
+    validarCampo(region, 'region_error2', 'Este campo es obligatorio.');
+    validarCampo(comuna, 'comuna_error2', 'Este campo es obligatorio.');
+    validarCampo(role, 'rol_error2', 'Este campo es obligatorio.');
+    validarCampo(clave_temporal, 'clave_temporal_error2', 'Este campo es obligatorio.');
+    return isValid; // true si todos los campos son válidos, false si hay algún error
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    configurarValidacionRut('.rut', '#rut_error2'); // Selector genérico para todos los campos con clase "rut"
+    document.getElementById('personForm').addEventListener('submit', validarFormularioRut);
+});
+
+document.addEventListener('DOMContentLoaded', function () 
+{
+  configurarValidacionLetrasYEspacios('.solo-letras'); // Configurar la validación de letras y espacios
+  configurarValidacionSoloNumeros('.solo-numeros'); 
+  configurarValidacionEmail('.email', '#correo_electronico_error2');
+});
+
+
+document.getElementById('personForm').addEventListener('submit', function(event)
+{
+        if (!validarCamposVaciosFormularioEmpleado()) {
+            event.preventDefault(); // Evitar el envío del formulario si hay campos vacíos
+        }
+});
+
+
+
+</script>

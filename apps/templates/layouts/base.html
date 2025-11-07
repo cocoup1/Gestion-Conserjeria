@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0 shrink-to-fit=no">
+
+
+
+  <link rel="apple-touch-icon" sizes="76x76" href="{{ ASSETS_ROOT }}/img/apple-icon.png">
+  <link rel="icon" type="image/png" href="{{ ASSETS_ROOT }}/img/favicon.png">
+
+  <title>
+    Gestion Conserjeria - {% block title %}{% endblock %}
+  </title>
+  {% load static %} 
+  <!--     Fonts and icons     -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+  <!-- Nucleo Icons -->
+  <link href="{{ ASSETS_ROOT }}/css/nucleo-icons.css" rel="stylesheet" />
+  <link href="{{ ASSETS_ROOT }}/css/nucleo-svg.css" rel="stylesheet" />
+ 
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+ 
+  <link href="{{ ASSETS_ROOT }}/css/nucleo-svg.css" rel="stylesheet" />
+  <!-- CSS Files -->
+  <link id="pagestyle" href="{{ ASSETS_ROOT }}/css/soft-ui-dashboard.css?v=1.0.6" rel="stylesheet" />
+  <link id="pagestyle_dark" href="{{ ASSETS_ROOT }}/css/dark-theme-core.css" rel="stylesheet" />
+  <!-- Incluir SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- Bootstrap Datepicker CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+  <!-- Specific CSS goes HERE -->
+  <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}"> <!-- Asegúrate de que la ruta sea correcta -->
+
+  {% block stylesheets %}{% endblock stylesheets %}  
+
+</head>
+<body class="g-sidenav-show  bg-gray-100">
+  
+  {% include "includes/sidebar.html" %} 
+
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+
+    {% include "includes/navigation.html" %} 
+    <div style="margin-top: -1rem;">
+      {% block content %}{% endblock content %}
+
+    </div>
+    
+  </main>
+
+  <!-- Core JS Files -->
+  {% include "includes/scripts.html" %}
+
+  <!-- Specific JS goes HERE --> 
+  {% block javascripts %}{% endblock javascripts %}  
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <!-- Incluir SweetAlert2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <!-- Bootstrap Datepicker JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+
+  
+  <style>
+    .datepicker-dropdown {
+            background-color: floralwhite !important
+        }
+  </style>
+
+  <script type="text/javascript">
+    $(document).ready(function () 
+    {
+        console.log('Script AJAX cargado correctamente');
+        
+        $('#id_region').change(function () {
+            console.log('Cambio detectado en región');
+            var url = '{% url "ajax_load_comunas" %}';  // URL de la vista que devuelve las comunas
+            var regionId = $(this).val();  // Obtener el ID de la región seleccionada
+            console.log('URL:', url);
+            console.log('Region ID seleccionado:', regionId);
+
+            $.ajax({
+                url: url,
+                data: {
+                    'region_id': regionId
+                },
+                success: function (data) {
+                    console.log('Respuesta recibida:', data);
+                    $('#id_comuna').html('<option value="">Seleccione</option>'); 
+                    $.each(data, function (key, value) {
+                        $('#id_comuna').append('<option value="' + value.id + '">' + value.nombre + '</option>');
+                    });
+                    console.log('Comunas cargadas:', $('#id_comuna option').length);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error en AJAX:', status, error);
+                    console.error('Respuesta:', xhr.responseText);
+                }
+            });
+        });
+
+        $('#id_fecha_ingreso').datepicker({
+          format: 'yyyy-mm-dd',
+          autoclose: true,
+          todayHighlight: true,
+          startDate: new Date()
+      });
+
+      // $('#id_fecha_registra_visita').datepicker({
+      //     format: 'yyyy-mm-dd',
+      //     autoclose: true,
+      //     todayHighlight: true,
+      //     startDate: new Date()
+      // });
+
+      $('#id_fecha_llegada_visita').datepicker({
+          format: 'yyyy-mm-dd',
+          autoclose: true,
+          todayHighlight: true,
+          startDate: new Date()
+      });
+      
+   
+       // Función genérica para mostrar el modal de confirmación
+    window.confirmDelete = function(url) {
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esto!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = url;
+        }
+      })
+    }
+    
+    window.confirmAction = function(url) {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "¡No podrás revertir esto!",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, confirmar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = url;
+      }
+    })
+  }
+
+
+   
+    });
+    </script>
+
+
+
+  <!-- Github buttons -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>  
+  <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
+  <script src="{{ ASSETS_ROOT }}/js/soft-ui-dashboard.min.js?v=1.0.6"></script>
+  
+</body>
+</html>
