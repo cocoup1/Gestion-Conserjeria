@@ -25,7 +25,10 @@ from apps.home.models import (
 from .forms import (
      PruebaForm, EmpleadoForm, EstacionamientoForm, 
      ReservaEstacionamientoForm, EmpleadoEditForm, 
-     ProfileForm, ReservaEstacionamientoEditForm, ReservaEstacionamientoVerDetalleForm)
+     ProfileForm, ReservaEstacionamientoEditForm,
+     ReservaEstacionamientoVerDetalleForm,UbicacionEstacionamientoForm)
+
+
 
 import logging
 
@@ -1060,3 +1063,80 @@ def profile_view(request):
         print("request.GET ::::: ", request.GET)
         form = ProfileForm(instance=user)
     return render(request, 'home/profile.html', {'form': form})
+
+@login_required(login_url="/login/")
+def ubicacion_estacionamiento(request):
+    """
+    Vista para gestionar la ubicación de estacionamientos.
+    Muestra un listado de todas las ubicaciones de estacionamiento disponibles.
+    """
+    # Obtener todas las ubicaciones de estacionamiento
+    ubicaciones = UbicacionEstacionamiento.objects.all()
+    
+    # Context para pasar al template
+    context = {
+        'segment': 'ubicacion-estacionamiento',
+        'ubicaciones': ubicaciones,
+        'submenu_open_mantenedor': True  # Para mantener el menú Mantenedor abierto
+    }
+    
+    return render(request, 'home/ubicacion-estacionamiento.html', context)
+
+# ----------------------- SECCIÓN UBICACIÓN ESTACIONAMIENTO MANTENEDOR --------------------
+
+@login_required(login_url="/login/")
+def ver_ubicaciones_estacionamiento_view(request):
+    """Vista para listar todas las ubicaciones de estacionamiento"""
+    ubicaciones = UbicacionEstacionamiento.objects.all().order_by('id')
+    
+    context = {
+        'segment': 'ubicacion-estacionamiento',
+        'ubicaciones': ubicaciones,
+        'submenu_open_mantenedor': True
+    }
+    
+    return render(request, 'home/ubicacion-estacionamiento.html', context)
+
+
+@login_required(login_url="/login/")
+def crear_ubicacion_estacionamiento_view(request):
+    """Vista para crear una nueva ubicación de estacionamiento"""
+    
+    formulario = UbicacionEstacionamientoForm(request.POST or None)
+    
+    if request.method == 'POST':
+        if formulario.is_valid():
+            formulario.save()
+            messages.success(request, 'Ubicación creada exitosamente.')
+            return redirect('ver_ubicaciones_estacionamiento')
+        else:
+            messages.error(request, "Hay errores en el formulario. Por favor, corrígelos.")
+    
+    return render(request, 'home/registrar-ubicacion-estacionamiento.html', {'formulario': formulario})
+
+
+@login_required(login_url="/login/")
+def editar_ubicacion_estacionamiento_view(request, id):
+    """Vista para editar una ubicación de estacionamiento existente"""
+    
+    ubicacion = get_object_or_404(UbicacionEstacionamiento, id=id)
+    formulario = UbicacionEstacionamientoForm(request.POST or None, instance=ubicacion)
+    
+    if request.method == 'POST':
+        if formulario.is_valid():
+            formulario.save()
+            messages.success(request, 'Ubicación actualizada exitosamente.')
+            return redirect('ver_ubicaciones_estacionamiento')
+        else:
+            messages.error(request, "Hay errores en el formulario. Por favor, corrígelos.")
+    
+    return render(request, 'home/editar-ubicacion-estacionamiento.html', {'formulario': formulario})
+
+
+@login_required(login_url="/login/")
+def eliminar_ubicacion_estacionamiento_view(request, id):
+    """Vista para eliminar una ubicación de estacionamiento"""
+    ubicacion = get_object_or_404(UbicacionEstacionamiento, id=id)
+    ubicacion.delete()
+    messages.success(request, 'Ubicación eliminada exitosamente.')
+    return redirect('ver_ubicaciones_estacionamiento')

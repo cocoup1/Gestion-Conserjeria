@@ -51,7 +51,13 @@ urlpatterns = [
     path('buscar-residentes/', buscar_residentes, name='buscar_residentes'),  
     path('obtener-datos-residente/', obtener_datos_residente, name='obtener_datos_residente'),
     path('obtener-datos-propiedad/', obtener_datos_propiedad, name='obtener_datos_propiedad'),
+    path('ubicacion-estacionamiento/', views.ubicacion_estacionamiento, name='ubicacion_estacionamiento'),
 
+    # Ubicaciones de estacionamiento (Mantenedor)
+    path('ubicacion-estacionamiento/', views.ver_ubicaciones_estacionamiento_view, name='ver_ubicaciones_estacionamiento'),
+    path('nueva-ubicacion-estacionamiento/', views.crear_ubicacion_estacionamiento_view, name='crear_ubicacion_estacionamiento'),
+    path('editar-ubicacion-estacionamiento/<int:id>', views.editar_ubicacion_estacionamiento_view, name='editar_ubicacion_estacionamiento'),
+    path('eliminar-ubicacion-estacionamiento/<int:id>', views.eliminar_ubicacion_estacionamiento_view, name='eliminar_ubicacion_estacionamiento'),
     # Matches any html file
     re_path(r'^.*\.*', views.pages, name='pages'),
 
