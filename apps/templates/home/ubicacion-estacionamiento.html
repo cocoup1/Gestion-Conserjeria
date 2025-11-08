@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Ubicación de Estacionamiento {% endblock title %}
+
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h6>UBICACIÓN DE ESTACIONAMIENTOS</h6>
+                    <a class="btn btn-success" href="{% url 'crear_ubicacion_estacionamiento' %}">Nueva Ubicación</a>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Nivel</th>
+                                    <th class="text-secondary opacity-7">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ubicacion in ubicaciones %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <p class="text-xs text-secondary mb-0">{{ ubicacion.id }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs text-secondary mb-0">{{ ubicacion.nombre }}</p>
+                                    </td>
+                                    <td class="align-middle">
+                                        <a class="btn btn-info" href="{% url 'editar_ubicacion_estacionamiento' ubicacion.id %}">Editar</a>
+                                        <a href="{% url 'eliminar_ubicacion_estacionamiento' ubicacion.id %}" class="btn btn-danger" onclick="return confirm('¿Está seguro de eliminar esta ubicación?')">Eliminar</a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-secondary text-xs">
+                                        No hay ubicaciones de estacionamiento registradas.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include "includes/footer.html" %}
+
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}{% endblock javascripts %}
