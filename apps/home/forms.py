@@ -11,6 +11,7 @@ from apps.home.models import (
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 import re
+from apps.home.models import UbicacionEstacionamiento
 
 
 
@@ -663,3 +664,17 @@ class ProfileForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+class UbicacionEstacionamientoForm(forms.ModelForm):
+    class Meta:
+        model = UbicacionEstacionamiento
+        fields = ['nombre']
+        labels = {
+            'nombre': 'Ubicación de Estacionamiento'
+        }
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: Nivel -1, Subsuelo 1, Piso 2, etc.'
+            })
+        }    
