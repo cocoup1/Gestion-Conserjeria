@@ -81,32 +81,32 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Configuración de la base de datos Producción
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'conserjeria_7',
-#         'USER': 'azure',
-#         'PASSWORD': '*****',
-#         'HOST': 'servidorconserjeria01.mysql.database.azure.com',
-#         'PORT': '3306',
-#         'OPTIONS': {
-#             'ssl': {
-#                 'ca': os.path.join(BASE_DIR, 'DigiCertGlobalRootCA.crt.pem')  # Ruta relativa basada en BASE_DIR
-#             }
-#         }
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'conserjeria_4',
-        'USER': 'root',
+        'NAME': 'dbconserjeria',
+        'USER': 'Javier',  # Azure MySQL Flexible Server usa solo el nombre de usuario
         'PASSWORD': 'Estrella.23',
-        'HOST': 'localhost',
-        'PORT': '3306'
+        'HOST': 'servidor-conserjeria.mysql.database.azure.com',
+        'PORT': '3306',
+        'OPTIONS': {
+            'ssl': {
+                'ca': os.path.join(BASE_DIR, 'core', 'certs', 'DigiCertGlobalRootG2.crt.pem')
+            }
+        }
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'conserjeria_4',
+#         'USER': 'root',
+#         'PASSWORD': 'Estrella.23',
+#         'HOST': 'localhost',
+#         'PORT': '3306'
+#     }
+# }
 
 # DATABASES = {
 #     'default': {
