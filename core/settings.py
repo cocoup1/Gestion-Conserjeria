@@ -20,9 +20,8 @@ DEBUG = env('DEBUG', default = True)
 ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets') 
 
 ALLOWED_HOSTS = [
-    'webappconserjeria-ddgtevgdfyfnbggy.westeurope-01.azurewebsites.net',
-    '127.0.0.1',
-    'localhost'
+    'https://webappconserjeria-ddgtevgdfyfnbggy.westeurope-01.azurewebsites.net',
+    'http://127.0.0.1:8081'
 ]
 CSRF_TRUSTED_ORIGINS = [
     'https://webappgestionconserjeria-f6cchganhnfpfsbc.brazilsouth-01.azurewebsites.net',
@@ -81,21 +80,21 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Configuración de la base de datos Producción
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dbconserjeria',
-        'USER': 'Javier',  # Azure MySQL Flexible Server usa solo el nombre de usuario
-        'PASSWORD': '*****',
-        'HOST': 'servidor-conserjeria.mysql.database.azure.com',
-        'PORT': '3306',
-        'OPTIONS': {
-            'ssl': {
-                'ca': os.path.join(BASE_DIR, 'core', 'certs', 'DigiCertGlobalRootG2.crt.pem')
-            }
-        }
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'conserjeria_7',
+#         'USER': 'azure',
+#         'PASSWORD': '*****',
+#         'HOST': 'servidorconserjeria01.mysql.database.azure.com',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'ssl': {
+#                 'ca': os.path.join(BASE_DIR, 'DigiCertGlobalRootCA.crt.pem')  # Ruta relativa basada en BASE_DIR
+#             }
+#         }
+#     }
+# }
 
 # DATABASES = {
 #     'default': {
@@ -118,7 +117,6 @@ DATABASES = {
         'PORT': env('DB_PORT')
     }
 }
-
 
 
 AUTH_PASSWORD_VALIDATORS = [
