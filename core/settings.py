@@ -20,12 +20,13 @@ DEBUG = env('DEBUG', default = True)
 ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets') 
 
 ALLOWED_HOSTS = [
-    'https://webappconserjeria-ddgtevgdfyfnbggy.westeurope-01.azurewebsites.net',
-    'http://127.0.0.1:8081'
+    'webappconserjeria-ddgtevgdfyfnbggy.westeurope-01.azurewebsites.net',
+    '127.0.0.1',
+    'localhost'
 ]
 CSRF_TRUSTED_ORIGINS = [
-    'https://webappgestionconserjeria-f6cchganhnfpfsbc.brazilsouth-01.azurewebsites.net',
-    'http://127.0.0.1:8081'
+  'https://webappconserjeria-ddgtevgdfyfnbggy.westeurope-01.azurewebsites.net',
+  'http://127.0.0.1:8081'
 ]
 
 # Aplicaciones instaladas
