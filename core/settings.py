@@ -20,7 +20,7 @@ DEBUG = env('DEBUG', default = True)
 ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets') 
 
 ALLOWED_HOSTS = [
-    'webappgestionconserjeria-f6cchganhnfpfsbc.brazilsouth-01.azurewebsites.net',
+    'webappconserjeria-ddgtevgdfyfnbggy.westeurope-01.azurewebsites.net',
     '127.0.0.1',
     'localhost'
 ]
@@ -86,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'dbconserjeria',
         'USER': 'Javier',  # Azure MySQL Flexible Server usa solo el nombre de usuario
-        'PASSWORD': 'Estrella.23',
+        'PASSWORD': '*****',
         'HOST': 'servidor-conserjeria.mysql.database.azure.com',
         'PORT': '3306',
         'OPTIONS': {
@@ -102,22 +102,23 @@ DATABASES = {
 #         'ENGINE': 'django.db.backends.mysql',
 #         'NAME': 'conserjeria_4',
 #         'USER': 'root',
-#         'PASSWORD': 'Estrella.23',
+#         'PASSWORD': 'xxxx',
 #         'HOST': 'localhost',
 #         'PORT': '3306'
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': env('DB_NAME', default='conserjeria_4'),
-#         'USER': env('DB_USER', default='root'),
-#         'PASSWORD': env('DB_PASSWORD', default='Estrella.23'),
-#         'HOST': env('DB_HOST', default='localhost'),
-#         'PORT': env('DB_PORT', default='3306'),
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT')
+    }
+}
+
 
 
 AUTH_PASSWORD_VALIDATORS = [
