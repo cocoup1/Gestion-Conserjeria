@@ -25,8 +25,8 @@ ALLOWED_HOSTS = [
     'localhost'
 ]
 CSRF_TRUSTED_ORIGINS = [
-    'https://webappgestionconserjeria-f6cchganhnfpfsbc.brazilsouth-01.azurewebsites.net',
-    'http://127.0.0.1:8081'
+  'https://webappconserjeria-ddgtevgdfyfnbggy.westeurope-01.azurewebsites.net',
+  'http://127.0.0.1:8081'
 ]
 
 # Aplicaciones instaladas
