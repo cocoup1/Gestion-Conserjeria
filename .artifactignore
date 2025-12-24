@@ -1,0 +1,46 @@
+# Excluir entornos virtuales
+entorno*/
+venv*/
+env*/
+ENV*/
+
+# Excluir archivos de desarrollo
+.env
+*.pyc
+__pycache__/
+*.log
+*.pot
+*.mo
+
+# Excluir archivos de git
+.git/
+.gitignore
+.artifactignore
+
+# Excluir archivos de configuración local
+*.sqlite3
+db.sqlite3
+check_db.py
+deployer.json
+log.json
+manage.spec
+pytest.ini
+requirements-dev.txt
+
+
+# Excluir archivos de backup
+backup_db.sql
+*.bak
+backup_db.sql
+
+
+# Excluir archivos de testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+
+# Excluir archivos de IDE
+.vscode/
+.idea/
+*.code-workspace

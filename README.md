@@ -20,7 +20,7 @@ PASOS
 ANTES DE CREAR EL PROEYCTO TIPO API DEBES CREAR EL ENTORNO VIRTUAL
 --------------------------------------------------------------------------
 2. Crear  el directorio que contendrá el proeycto, abrirlo con visual estudio code y dedse aqui crear y activar un nuevo entorno virtual con python 3.9 o el que usará.
-  - > py -3.9 -m venv entorno
+  - > py -3.12 -m venv entorno
   - > .\entorno\Scripts\activate
 
 2.1 Creo el proeycto con un punto (esto para qeu no cree el proeycto dentro de una carpeta nueva)
