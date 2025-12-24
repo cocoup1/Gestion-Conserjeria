@@ -1,23 +1,53 @@
 trigger:
-- main
+  branches:
+    include:
+      - main
 
 pool:
-  name: Default   # Tu agente self-hosted
+  vmImage: 'ubuntu-latest'
 
 steps:
-- checkout: self
+# 1) Seleccionar versión de Python
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.12'
+  displayName: 'Set Python Version'
 
-# Crear zip con la app antes de desplegar
+# 2) Instalar dependencias
+- script: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+  displayName: 'Install Dependencies'
+
+# 3) Ejecutar collectstatic (sin base de datos)
+- script: |
+    python manage.py migrate --noinput
+  displayName: 'Run Django Migrations'
+
+# 4) Generar archivo ZIP (excluyendo archivos innecesarios)
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+    rootFolderOrFile: '$(Build.SourcesDirectory)'
     includeRootFolder: false
+    archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
     replaceExistingArchive: true
+  displayName: 'Archive Project'
 
-# Deploy al WebApp de Azure
+# 5) Publicar artefacto
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+  displayName: 'Publish Artifact'
+
+# 6) Desplegar en Azure App Service
 - task: AzureWebApp@1
   inputs:
-    azureSubscription: 'SC-Conserjeria-WestEurope'
-    appName: 'webappconserjeria-ddgtvegdgfyfnbgqy'
+    azureSubscription: 'Azure subscription 1'
+    appType: 'webAppLinux'
+    appName: 'WebAppConserjeria'
     package: '$(Build.ArtifactStagingDirectory)/app.zip'
+    startUpCommand: 'gunicorn --bind=0.0.0.0:8000 --timeout 600 core.wsgi:application'
+  displayName: 'Deploy to Azure Web App'

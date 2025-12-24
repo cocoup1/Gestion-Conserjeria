@@ -12,21 +12,23 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Cargar las variables del archivo .env
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+if os.path.exists(os.path.join(BASE_DIR, '.env')):
+    environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-SECRET_KEY = env('SECRET_KEY', default='S#perS3crEt_007')
-DEBUG = env('DEBUG', default = True)
+SECRET_KEY = env('SECRET_KEY')
+DEBUG = env.bool('DEBUG', default=False)
 
 ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets') 
 
-ALLOWED_HOSTS = [
-    'webappconserjeria-ddgtevgdfyfnbggy.westeurope-01.azurewebsites.net',
-    '127.0.0.1',
-    'localhost'
-]
+ALLOWED_HOSTS = env.list(
+    'ALLOWED_HOSTS',
+    default=['.azurewebsites.net', 'localhost', '127.0.0.1']
+)
+
+# PARA VARIABLES EN AZURE -> ALLOWED_HOSTS=.azurewebsites.net
 CSRF_TRUSTED_ORIGINS = [
-  'https://webappconserjeria-ddgtevgdfyfnbggy.westeurope-01.azurewebsites.net',
-  'http://127.0.0.1:8081'
+    'https://gestion-conserjeria-dgarhydjhfdphvea.westeurope-01.azurewebsites.net',
+    'http://127.0.0.1:8081'
 ]
 
 # Aplicaciones instaladas
@@ -79,35 +81,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-# Configuración de la base de datos Producción
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'conserjeria_7',
-#         'USER': 'azure',
-#         'PASSWORD': '*****',
-#         'HOST': 'servidorconserjeria01.mysql.database.azure.com',
-#         'PORT': '3306',
-#         'OPTIONS': {
-#             'ssl': {
-#                 'ca': os.path.join(BASE_DIR, 'DigiCertGlobalRootCA.crt.pem')  # Ruta relativa basada en BASE_DIR
-#             }
-#         }
-#     }
-# }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'conserjeria_4',
-#         'USER': 'root',
-#         'PASSWORD': 'xxxx',
-#         'HOST': 'localhost',
-#         'PORT': '3306'
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -115,7 +88,10 @@ DATABASES = {
         'USER': env('DB_USER'),
         'PASSWORD': env('DB_PASSWORD'),
         'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT')
+        'PORT': env.int('DB_PORT', default=3306),
+        'OPTIONS': {
+            'ssl': {'ca': os.path.join(BASE_DIR, 'DigiCertGlobalRootCA.crt.pem')}
+        }
     }
 }
 
@@ -139,12 +115,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(CORE_DIR, 'apps/static')]
 
 # Configuración de WhiteNoise
-if DEBUG:
-    # En desarrollo, usar el storage estándar sin compresión
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-else:
-    # En producción, usar WhiteNoise con compresión
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# para  prod.
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Para levantar local
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # Configuración del campo ID automático
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
