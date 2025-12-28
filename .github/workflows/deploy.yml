@@ -17,6 +17,20 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Necesario para compilar pycairo/mysqlclient en el runner
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            pkg-config \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libgdk-pixbuf2.0-dev \
+            shared-mime-info \
+            default-libmysqlclient-dev
+
+      # Empaqueta dependencias Python dentro del deploy (evita Oryx/pip en Azure)
       - name: Install Python deps into .python_packages
         run: |
           python -m pip install --upgrade pip
@@ -38,7 +52,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy
         uses: azure/webapps-deploy@v3
         with:
           app-name: webappconserjeria02
