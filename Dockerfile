@@ -1,18 +1,23 @@
-FROM python:3.9
+# Dockerfile
+FROM python:3.12-slim-bullseye
 
-# set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-COPY requirements.txt .
-# install python dependencies
-RUN pip install --upgrade pip
+# Dependencias del SO necesarias para xhtml2pdf/reportlab/cairo/pango/freetype
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential pkg-config \
+    libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 \
+    libcairo2-dev libpango1.0-dev libgdk-pixbuf2.0-dev \
+    libfreetype6 libjpeg62-turbo libpng16-16 zlib1g \
+    shared-mime-info fonts-dejavu \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY . /app
 
-# running migrations
-RUN python manage.py migrate
-
-# gunicorn
-CMD ["gunicorn", "--config", "gunicorn-cfg.py", "core.wsgi"]
+CMD ["bash", "-lc", "gunicorn core.wsgi:application --bind 0.0.0.0:${PORT:-8000} --timeout 600"]
