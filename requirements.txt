@@ -25,8 +25,10 @@ whitenoise>=5.3.0
 # Variables de entorno para Django
 django-environ>=0.10.0
 
-# Cliente MySQL (asegúrate de instalar la versión compatible con Python 3.12)
-mysqlclient>=2.1.0
+# Cliente PyMySQL (asegúrate de instalar la versión compatible con Python 3.12)
+# mysqlclient>=2.1.0
+# cambia a driver PyMySQL , conector para la aplicacion webapp
+PyMySQL>=1.1.0
 
 #Libreria para impresion pdf
 xhtml2pdf>=0.2.11
