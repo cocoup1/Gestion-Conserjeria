@@ -1,0 +1,53 @@
+name: Build & Deploy Docker to Azure Web App (ACR)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  WEBAPP_NAME: webappconserjeria02
+  RESOURCE_GROUP: gr-coserjeria02
+  IMAGE_NAME: gestion-conserjeria
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Docker login to ACR
+        run: |
+          echo "${{ secrets.ACR_PASSWORD }}" | docker login "${{ secrets.ACR_LOGIN_SERVER }}" \
+            -u "${{ secrets.ACR_USERNAME }}" --password-stdin
+
+      - name: Build & Push image
+        run: |
+          IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/${IMAGE_NAME}:${GITHUB_SHA}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      - name: Point WebApp to the new image
+        run: |
+          az webapp config container set \
+            --resource-group "${RESOURCE_GROUP}" \
+            --name "${WEBAPP_NAME}" \
+            --docker-custom-image-name "${IMAGE}" \
+            --docker-registry-server-url "https://${{ secrets.ACR_LOGIN_SERVER }}" \
+            --docker-registry-server-user "${{ secrets.ACR_USERNAME }}" \
+            --docker-registry-server-password "${{ secrets.ACR_PASSWORD }}"
+
+          az webapp config appsettings set \
+            --resource-group "${RESOURCE_GROUP}" \
+            --name "${WEBAPP_NAME}" \
+            --settings WEBSITES_PORT=8000 PORT=8000
+
+      - name: Restart WebApp
+        run: |
+          az webapp restart --resource-group "${RESOURCE_GROUP}" --name "${WEBAPP_NAME}"

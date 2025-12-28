@@ -1,56 +1,10 @@
-# .github/workflows/deploy.yml
-name: Deploy Django to Azure App Service
+name: Legacy code deploy (disabled)
 
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 jobs:
-  deploy:
+  noop:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Construye dependencias en un entorno compatible con el runtime de Azure App Service
-      # (evita wheels que requieren glibc más nuevo, ej: cryptography)
-      - name: Build .python_packages in Debian bullseye (Azure compatible)
-        run: |
-          rm -rf .python_packages
-          docker run --rm \
-            -v "$PWD":/app -w /app \
-            python:3.12-slim-bullseye bash -lc "
-              apt-get update && apt-get install -y \
-                build-essential pkg-config \
-                libcairo2-dev libpango1.0-dev libgdk-pixbuf2.0-dev shared-mime-info \
-              && python -m pip install --upgrade pip \
-              && pip install -r requirements.txt --target=.python_packages/lib/site-packages
-            "
-
-      - name: Create zip package
-        run: |
-          rm -f app.zip
-          zip -r app.zip . \
-            -x "*.git*" \
-            -x "**/__pycache__/**" \
-            -x "**/.pytest_cache/**" \
-            -x "**/.venv/**" \
-            -x "**/venv/**" \
-            -x "**/antenv/**" \
-            -x "**/__oryx_packages__/**"
-
-          echo "=== Check .python_packages in zip ==="
-          unzip -l app.zip | grep -E '\.python_packages/' | head -n 20 || true
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: webappconserjeria02
-          package: app.zip
+      - run: echo "Legacy deploy disabled. Use deploy-container.yml"
