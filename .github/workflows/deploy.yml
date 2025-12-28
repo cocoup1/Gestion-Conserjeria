@@ -11,10 +11,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # Construye .python_packages dentro de Debian bullseye (compatible con glibc vieja de App Service)
-      - name: Build .python_packages in bullseye (Azure compatible)
+      # Construye dependencias en un entorno compatible con el runtime de Azure App Service
+      # (evita wheels que requieren glibc más nuevo, ej: cryptography)
+      - name: Build .python_packages in Debian bullseye (Azure compatible)
         run: |
           rm -rf .python_packages
           docker run --rm \
@@ -29,6 +31,7 @@ jobs:
 
       - name: Create zip package
         run: |
+          rm -f app.zip
           zip -r app.zip . \
             -x "*.git*" \
             -x "**/__pycache__/**" \
@@ -39,14 +42,14 @@ jobs:
             -x "**/__oryx_packages__/**"
 
           echo "=== Check .python_packages in zip ==="
-          unzip -l app.zip | grep -E '\.python_packages/' | head -n 10 || true
+          unzip -l app.zip | grep -E '\.python_packages/' | head -n 20 || true
 
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: webappconserjeria02
