@@ -46,6 +46,9 @@ jobs:
             -x "**/venv/**" \
             -x "**/antenv/**" \
             -x "**/__oryx_packages__/**"
+            
+          echo "=== Check .python_packages in zip ==="
+          unzip -l app.zip | grep -E '\.python_packages/' | head -n 10 || true
 
       - name: Azure Login
         uses: azure/login@v2
