@@ -1,634 +1,603 @@
-# Manual de Despliegue - Django en Azure Container Apps
+# Manual de Despliegue Optimizado - Azure Container Apps
 
-**Proyecto:** Sistema de Gestión de Conserjería  
-**Fecha:** 30 de Diciembre de 2025  
-**Objetivo:** Desplegar aplicación Django usando contenedores en Azure Container Apps con MySQL Flexible Server
-
----
-
-## Tabla de Contenidos
-1. [Requisitos Previos](#requisitos-previos)
-2. [Autenticación en Azure](#autenticación-en-azure)
-3. [Creación de Infraestructura](#creación-de-infraestructura)
-4. [Configuración de la Aplicación](#configuración-de-la-aplicación)
-5. [Construcción y Despliegue](#construcción-y-despliegue)
-6. [Configuración de Variables de Entorno](#configuración-de-variables-de-entorno)
-7. [Migraciones y Base de Datos](#migraciones-y-base-de-datos)
-8. [Verificación y Pruebas](#verificación-y-pruebas)
-9. [Comandos de Mantenimiento](#comandos-de-mantenimiento)
+## 📋 Índice
+1. [Introducción](#introducción)
+2. [Estrategia de Costos](#estrategia-de-costos)
+3. [Requisitos Previos](#requisitos-previos)
+4. [Arquitectura](#arquitectura)
+5. [Despliegue Paso a Paso](#despliegue-paso-a-paso)
+6. [Configuración de Alertas de Presupuesto](#configuración-de-alertas-de-presupuesto)
+7. [Eliminación de Recursos](#eliminación-de-recursos)
+8. [Troubleshooting](#troubleshooting)
+9. [Estimación de Costos](#estimación-de-costos)
 
 ---
 
-## Requisitos Previos
+## 🎯 Introducción
 
-### Software Necesario
-- Azure CLI instalado
-- Docker (opcional, ACR puede construir las imágenes)
-- Python 3.12
-- MySQL Workbench (para gestión de BD)
+Este manual describe el despliegue optimizado de la aplicación **Gestión de Conserjería** en Azure Container Apps, diseñado específicamente para **portafolios y demostraciones**, priorizando el control de costos.
 
-### Conocimientos
-- Conceptos básicos de Docker
-- Django Framework
-- Azure CLI
-- MySQL
+### Características principales:
+- ✅ **Costo $0** cuando no está en uso
+- ✅ Escalado automático a 0 réplicas
+- ✅ Despliegue rápido (~45-60 minutos)
+- ✅ Fácil eliminación de recursos
+- ✅ Base de datos con backup para restauración rápida
 
 ---
 
-## Autenticación en Azure
+## 💰 Estrategia de Costos
 
-### Paso 1: Iniciar sesión en Azure
+### Objetivo: Mantener costos < $3 USD/mes
 
-```powershell
-# Autenticación con tenant específico
-az login --tenant 4640988d-3358-44cc-badf-7e3c93497ab3
-```
+#### Recursos a desplegar:
+| Recurso | Costo Mensual | Costo Diario | Estrategia |
+|---------|---------------|--------------|------------|
+| **Container Apps** | ~$0.50-2 | ~$0.02-0.07 | Min replicas: 0 (escala a 0 cuando no hay tráfico) |
+| **PostgreSQL Flexible** | ~$8-15 | ~$0.27-0.50 | **Solo crear cuando sea necesario**, eliminar después |
+| **Container Registry** | $0 | $0 | Usar Docker Hub (gratuito) en lugar de ACR |
+| **Container Environment** | Incluido | Incluido | Sin costo adicional con min replicas: 0 |
 
-**Nota:** Usar el tenant correcto es crucial. Verificar en Azure Portal > Azure Active Directory.
+#### Costo real estimado:
+- **Sin base de datos**: ~$0.50-1/mes (solo Container Apps inactivo)
+- **Con base de datos activa 1 día**: ~$0.50 adicional
+- **Con base de datos activa todo el mes**: ~$8-10/mes
 
-### Paso 2: Verificar suscripción activa
-
-```powershell
-# Listar suscripciones disponibles
-az account list --output table
-
-# Establecer suscripción activa
-az account set --subscription dea554ce-8eea-41eb-8579-d6a436a70073
-
-# Verificar suscripción actual
-az account show
-```
+### ⚠️ Recomendación para Portafolio:
+**Elimina todos los recursos después de cada demo** y redespliega solo cuando un reclutador lo solicite. Esto mantiene el costo en $0 USD.
 
 ---
 
-## Creación de Infraestructura
+## 📦 Requisitos Previos
 
-### Paso 3: Crear Grupo de Recursos
+### 1. Software instalado:
+- [x] Azure CLI instalado y actualizado
+- [x] Docker Desktop instalado y corriendo
+- [x] Git instalado
+- [x] Cuenta de Docker Hub (gratuita)
 
-```powershell
-az group create `
-  --name gr-coserjeria02 `
-  --location brazilsouth
-```
+### 2. Acceso a Azure:
+- [x] Suscripción de Azure activa
+- [x] Permisos para crear recursos
 
-**Regiones disponibles:** Chile Central no soporta Container Apps ni ACR Build. Usar Brazil South.
+### 3. Archivos necesarios:
+- [x] Código fuente de la aplicación
+- [x] `backup_db.sql` con datos de la base de datos
+- [x] `DigiCertGlobalRootG2.crt.pem` para conexión SSL a PostgreSQL
 
-### Paso 4: Crear MySQL Flexible Server
+### 4. Verificaciones previas:
+```bash
+# Verificar Azure CLI
+az --version
 
-```powershell
-# Crear servidor MySQL
-az mysql flexible-server create `
-  --resource-group gr-coserjeria02 `
-  --name servidor-conserjeria02 `
-  --location chilecentralz `
-  --admin-user Javier `
-  --admin-password "Estrella.23" `
-  --sku-name Standard_B1ms `
-  --tier Burstable `
-  --public-access 0.0.0.0-255.255.255.255 `
-  --version 8.0.21 `
-  --storage-size 20
-```
+# Login en Azure
+az login
 
-**Importante:**
-- `--public-access 0.0.0.0-255.255.255.255`: Permite conexiones desde cualquier IP (ajustar en producción)
-- `Standard_B1ms`: SKU económico para desarrollo
-- El servidor viene con `require_secure_transport=ON` por defecto
+# Verificar Docker
+docker --version
 
-### Paso 5: Crear Base de Datos
-
-```powershell
-# Listar bases de datos existentes
-az mysql flexible-server db list `
-  --resource-group gr-coserjeria02 `
-  --server-name servidor-conserjeria02
-
-# La base de datos por defecto es: flexibleserverdb
-```
-
-**Nota:** MySQL Flexible Server crea automáticamente `flexibleserverdb`. Usar este nombre en la configuración.
-
-### Paso 6: Crear Azure Container Registry
-
-```powershell
-az acr create `
-  --resource-group gr-coserjeria02 `
-  --name acrconserjeria02br `
-  --sku Basic `
-  --location brazilsouth
-```
-
-**Nota:** Los nombres de ACR no pueden contener guiones, solo caracteres alfanuméricos.
-
-### Paso 7: Habilitar Admin en ACR
-
-```powershell
-az acr update `
-  --name acrconserjeria02br `
-  --admin-enabled true
-
-# Obtener credenciales
-az acr credential show --name acrconserjeria02br
-```
-
-**Guardar:** `username` y `password` para configurar Container App.
-
-### Paso 8: Crear Container Apps Environment
-
-```powershell
-az containerapp env create `
-  --name env-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --location brazilsouth
+# Verificar que Docker está corriendo
+docker ps
 ```
 
 ---
 
-## Configuración de la Aplicación
+## 🏗️ Arquitectura
 
-### Paso 9: Descargar Certificado SSL para MySQL
+```
+┌─────────────────────────────────────────────────┐
+│         Internet / Usuarios                     │
+└────────────────┬────────────────────────────────┘
+                 │ HTTPS
+                 ▼
+┌─────────────────────────────────────────────────┐
+│    Azure Container Apps (Django App)            │
+│    - Min replicas: 0 (escala a 0)              │
+│    - Max replicas: 5                            │
+│    - Puerto: 8000                               │
+└────────────────┬────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────┐
+│  Azure Database for PostgreSQL Flexible Server  │
+│    - Burstable tier B1ms                        │
+│    - SSL habilitado                             │
+│    - Puerto: 5432                               │
+└─────────────────────────────────────────────────┘
 
-```powershell
-# Descargar certificado DigiCert Global Root G2
-Invoke-WebRequest `
-  -Uri "https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem" `
-  -OutFile "DigiCertGlobalRootG2.crt.pem"
+┌─────────────────────────────────────────────────┐
+│         Docker Hub (Container Registry)         │
+│    - Repositorio público (gratis)               │
+│    - Imagen: tu-usuario/gestion-conserjeria     │
+└─────────────────────────────────────────────────┘
 ```
 
-**Ubicación:** Colocar en la raíz del proyecto Django.
+### Decisiones de Arquitectura:
 
-### Paso 10: Configurar settings.py
+| Decisión | Razón |
+|----------|-------|
+| Docker Hub vs ACR | Ahorra $5/mes, suficiente para portafolio |
+| Min replicas: 0 | Costo $0 cuando no hay tráfico |
+| PostgreSQL Flexible | Tier más económico con auto-pause (si aplica) |
+| Grupo de recursos único | Fácil eliminación completa |
 
-**Archivo:** `core/settings.py`
+---
 
+## 🚀 Despliegue Paso a Paso
+
+### Fase 1: Preparación (5 min)
+
+#### 1.1 Login en Docker Hub
+```bash
+docker login
+# Ingresa tu usuario y password de Docker Hub
+```
+
+#### 1.2 Configurar variables de entorno
+```bash
+# Variables generales
+RESOURCE_GROUP="rg-gestion-conserjeria"
+LOCATION="brazilsouth"
+ACR_NAME="acrconserjer ia02br"  # Ya no se usará ACR, usar Docker Hub
+DOCKER_HUB_USER="tu-usuario-dockerhub"
+APP_NAME="app-conserjeria02"
+ENV_NAME="env-conserjeria02"
+DB_SERVER_NAME="psql-conserjeria02"
+DB_NAME="gestion_conserjeria"
+DB_ADMIN_USER="adminuser"
+DB_ADMIN_PASSWORD="TuPasswordSeguro123!"  # CAMBIAR
+```
+
+---
+
+### Fase 2: Crear Recursos de Azure (10 min)
+
+#### 2.1 Crear grupo de recursos
+```bash
+az group create \
+  --name $RESOURCE_GROUP \
+  --location $LOCATION
+```
+
+#### 2.2 Crear base de datos PostgreSQL
+```bash
+az postgres flexible-server create \
+  --resource-group $RESOURCE_GROUP \
+  --name $DB_SERVER_NAME \
+  --location $LOCATION \
+  --admin-user $DB_ADMIN_USER \
+  --admin-password $DB_ADMIN_PASSWORD \
+  --sku-name Standard_B1ms \
+  --tier Burstable \
+  --storage-size 32 \
+  --version 14 \
+  --public-access 0.0.0.0-255.255.255.255 \
+  --yes
+```
+
+#### 2.3 Crear base de datos dentro del servidor
+```bash
+az postgres flexible-server db create \
+  --resource-group $RESOURCE_GROUP \
+  --server-name $DB_SERVER_NAME \
+  --database-name $DB_NAME
+```
+
+#### 2.4 Habilitar SSL en PostgreSQL
+```bash
+az postgres flexible-server parameter set \
+  --resource-group $RESOURCE_GROUP \
+  --server-name $DB_SERVER_NAME \
+  --name require_secure_transport \
+  --value ON
+```
+
+#### 2.5 Obtener connection string
+```bash
+# Construir connection string
+DB_HOST="${DB_SERVER_NAME}.postgres.database.azure.com"
+CONNECTION_STRING="postgresql://${DB_ADMIN_USER}:${DB_ADMIN_PASSWORD}@${DB_HOST}:5432/${DB_NAME}?sslmode=require"
+
+echo "Tu connection string:"
+echo $CONNECTION_STRING
+```
+
+---
+
+### Fase 3: Preparar y Subir Imagen Docker (15 min)
+
+#### 3.1 Actualizar settings.py con configuración de producción
 ```python
-# Configuración de ALLOWED_HOSTS
-ALLOWED_HOSTS = env.list(
-    'ALLOWED_HOSTS',
-    default=['.azurecontainerapps.io', 'localhost', '127.0.0.1']
-)
+# core/settings.py
+# Asegúrate de tener esta configuración
 
-# Configuración de CSRF_TRUSTED_ORIGINS
-CSRF_TRUSTED_ORIGINS = [
-    'https://app-conserjeria02.ashyhill-67264477.brazilsouth.azurecontainerapps.io',
-    'http://127.0.0.1:8081'
-]
+import os
+from pathlib import Path
 
-# Configuración de Base de Datos con SSL
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get('SECRET_KEY', 'tu-secret-key-por-defecto')
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+
+# Database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DB_NAME', default='flexibleserverdb'),
-        'USER': env('DB_USER', default='Javier'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST', default='servidor-conserjeria02.mysql.database.azure.com'),
-        'PORT': env('DB_PORT', default='3306'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'gestion_conserjeria'),
+        'USER': os.environ.get('DB_USER', 'adminuser'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
         'OPTIONS': {
-            'ssl': {
-                'ca': os.path.join(BASE_DIR, 'DigiCertGlobalRootG2.crt.pem')
-            }
+            'sslmode': 'require',
+            'sslrootcert': '/app/DigiCertGlobalRootG2.crt.pem'
         }
     }
 }
 ```
 
-### Paso 11: Verificar Dockerfile
-
-**Archivo:** `Dockerfile`
-
-```dockerfile
-FROM python:3.12-slim-bullseye
-
-# Instalar dependencias del sistema para xhtml2pdf
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpango1.0-dev \
-    libcairo2-dev \
-    libgdk-pixbuf2.0-dev \
-    shared-mime-info \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . /app
-
-RUN python manage.py collectstatic --noinput || echo "Collectstatic failed, will run at startup"
-
-EXPOSE 8000
-
-CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--timeout", "600", "--workers", "2"]
-```
-
----
-
-## Construcción y Despliegue
-
-### Paso 12: Construir Imagen en ACR
-
-```powershell
-# Construcción remota en Azure Container Registry
-az acr build `
-  --registry acrconserjeria02br `
-  --image conserjeria:latest `
-  .
-```
-
-**Ventajas de ACR Build:**
-- No requiere Docker local
-- Construcción en la nube optimizada
-- Automáticamente sube la imagen al registro
-
-**Tiempo aproximado:** 2-3 minutos
-
-### Paso 13: Crear Container App
-
-```powershell
-az containerapp create `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --environment env-conserjeria02 `
-  --image acrconserjeria02br.azurecr.io/conserjeria:latest `
-  --target-port 8000 `
-  --ingress external `
-  --registry-server acrconserjeria02br.azurecr.io `
-  --registry-username acrconserjeria02br `
-  --registry-password <PASSWORD_DEL_ACR> `
-  --cpu 0.5 `
-  --memory 1Gi `
-  --min-replicas 0 `
-  --max-replicas 10
-```
-
-**Parámetros importantes:**
-- `--min-replicas 0`: Escala a cero para minimizar costos
-- `--max-replicas 10`: Escalado automático según demanda
-- `--ingress external`: Aplicación accesible desde internet
-- `--cpu 0.5 --memory 1Gi`: Recursos suficientes para Django
-
----
-
-## Configuración de Variables de Entorno
-
-### Paso 14: Configurar Variables de Entorno
-
-```powershell
-# Configurar todas las variables necesarias
-az containerapp update `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --set-env-vars `
-    SECRET_KEY="<TU_SECRET_KEY_DE_DJANGO>" `
-    DB_NAME=flexibleserverdb `
-    DB_USER=Javier `
-    DB_PASSWORD="Estrella.23" `
-    DB_HOST=servidor-conserjeria02.mysql.database.azure.com `
-    DB_PORT=3306 `
-    DEBUG=False `
-    ALLOWED_HOSTS=".azurecontainerapps.io,localhost,127.0.0.1" `
-    ASSETS_ROOT="/static/assets"
-```
-
-**Generar SECRET_KEY en Django:**
-```python
-from django.core.management.utils import get_random_secret_key
-print(get_random_secret_key())
-```
-
-### Paso 15: Verificar Variables
-
-```powershell
-# Ver configuración actual
-az containerapp show `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --query properties.template.containers[0].env
-```
-
----
-
-## Migraciones y Base de Datos
-
-### Paso 16: Migrar Base de Datos Local a Azure
-
-**Opción 1: Usando MySQL Workbench**
-1. Conectar a servidor local
-2. Exportar base de datos (Data Export)
-3. Conectar a Azure MySQL: `servidor-conserjeria02.mysql.database.azure.com`
-4. Importar base de datos (Data Import)
-
-**Opción 2: Usando mysqldump**
+#### 3.2 Build imagen Docker
 ```bash
-# Exportar
-mysqldump -u root -p dbconserjeria02 > backup.sql
-
-# Importar a Azure
-mysql -h servidor-conserjeria02.mysql.database.azure.com \
-  -u Javier -p flexibleserverdb < backup.sql
+# Desde la raíz del proyecto
+docker build -t ${DOCKER_HUB_USER}/gestion-conserjeria:latest .
 ```
 
-### Paso 17: Registrar Migraciones en Django
-
-```powershell
-# Conectar al contenedor y ejecutar migraciones
-az containerapp exec `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --command "python manage.py migrate --fake-initial"
+#### 3.3 Push a Docker Hub
+```bash
+docker push ${DOCKER_HUB_USER}/gestion-conserjeria:latest
 ```
-
-**`--fake-initial`:** Registra las migraciones sin intentar crear tablas que ya existen.
 
 ---
 
-## Verificación y Pruebas
+### Fase 4: Desplegar Container App (15 min)
 
-### Paso 18: Obtener URL de la Aplicación
+#### 4.1 Crear Container Apps Environment
+```bash
+az containerapp env create \
+  --name $ENV_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --location $LOCATION
+```
 
-```powershell
-az containerapp show `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --query properties.configuration.ingress.fqdn `
+#### 4.2 Crear Container App
+```bash
+az containerapp create \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --environment $ENV_NAME \
+  --image ${DOCKER_HUB_USER}/gestion-conserjeria:latest \
+  --target-port 8000 \
+  --ingress external \
+  --min-replicas 0 \
+  --max-replicas 5 \
+  --cpu 0.5 \
+  --memory 1.0Gi \
+  --env-vars \
+    SECRET_KEY=secretvaluefromkeyvault123 \
+    DEBUG=False \
+    ALLOWED_HOSTS=*.azurecontainerapps.io \
+    DB_NAME=$DB_NAME \
+    DB_USER=$DB_ADMIN_USER \
+    DB_PASSWORD=$DB_ADMIN_PASSWORD \
+    DB_HOST=$DB_HOST \
+    DB_PORT=5432
+```
+
+#### 4.3 Obtener URL de la aplicación
+```bash
+az containerapp show \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --query properties.configuration.ingress.fqdn \
   --output tsv
 ```
 
-**URL obtenida:** `https://app-conserjeria02.ashyhill-67264477.brazilsouth.azurecontainerapps.io`
+---
 
-### Paso 19: Verificar Logs
+### Fase 5: Restaurar Base de Datos (10 min)
 
-```powershell
-# Ver logs en tiempo real
-az containerapp logs show `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --follow
+#### 5.1 Conectar a PostgreSQL y restaurar backup
+```bash
+# Opción 1: Desde tu máquina local
+psql "$CONNECTION_STRING" < backup_db.sql
 
-# Ver logs recientes
-az containerapp logs show `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --tail 100
+# Opción 2: Usando Azure CLI
+az postgres flexible-server execute \
+  --name $DB_SERVER_NAME \
+  --admin-user $DB_ADMIN_USER \
+  --admin-password $DB_ADMIN_PASSWORD \
+  --database-name $DB_NAME \
+  --file-path backup_db.sql
 ```
 
-### Paso 20: Probar Conexión a Base de Datos
-
-```powershell
-# Ejecutar comando en el contenedor
-az containerapp exec `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --command "python manage.py check --database default"
+#### 5.2 Aplicar migraciones (si hay nuevas)
+```bash
+# Conectar al container y ejecutar
+az containerapp exec \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --command "python manage.py migrate"
 ```
 
 ---
 
-## Comandos de Mantenimiento
+### Fase 6: Verificación (5 min)
 
-### Actualizar Aplicación
+#### 6.1 Verificar que la app está corriendo
+```bash
+# Obtener URL
+APP_URL=$(az containerapp show \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --query properties.configuration.ingress.fqdn \
+  --output tsv)
 
-```powershell
-# 1. Reconstruir imagen con cambios
-az acr build `
-  --registry acrconserjeria02br `
-  --image conserjeria:latest `
-  .
+echo "Tu aplicación está en: https://$APP_URL"
 
-# 2. Actualizar Container App con nueva imagen
-az containerapp update `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --image acrconserjeria02br.azurecr.io/conserjeria:latest
+# Probar endpoint
+curl -I https://$APP_URL
 ```
 
-### Escalar Aplicación
+#### 6.2 Verificar logs
+```bash
+az containerapp logs show \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --tail 50
+```
 
-```powershell
-# Escalar manualmente
-az containerapp update `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --min-replicas 1 `
+#### 6.3 Verificar escalado
+```bash
+az containerapp revision list \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --output table
+```
+
+---
+
+## 📊 Configuración de Alertas de Presupuesto
+
+### Opción 1: Desde Azure Portal (Recomendada para principiantes)
+
+1. Ve a **Azure Portal** → Busca "Cost Management"
+2. Selecciona **Budgets** (Presupuestos)
+3. Click en **+ Add**
+4. Configura:
+   - **Scope**: Tu suscripción o grupo de recursos
+   - **Budget name**: "Presupuesto-Conserjeria"
+   - **Reset period**: Monthly
+   - **Amount**: $3 USD
+5. En **Alert conditions**:
+   - **Type**: Actual
+   - **% of budget**: 80 (recibirás alerta en $2.40)
+   - **Email**: Tu correo electrónico
+6. Guarda
+
+### Opción 2: Usando Azure CLI
+
+```bash
+# Crear presupuesto de $3 con alerta al 80%
+az consumption budget create \
+  --budget-name "presupuesto-conserjeria" \
+  --category Cost \
+  --amount 3 \
+  --time-grain Monthly \
+  --resource-group $RESOURCE_GROUP \
+  --notifications \
+    '{"enabled":true,"operator":"GreaterThan","threshold":80,"contactEmails":["tu-email@example.com"]}'
+```
+
+---
+
+## 🗑️ Eliminación de Recursos
+
+### Cuando termines la demo, elimina TODO para mantener costo en $0:
+
+#### Opción 1: Eliminar grupo de recursos completo (Recomendada)
+```bash
+# Esto elimina TODO: BD, Container App, Environment, etc.
+az group delete \
+  --name $RESOURCE_GROUP \
+  --yes \
+  --no-wait
+```
+
+#### Opción 2: Eliminar recursos individualmente
+
+```bash
+# 1. Eliminar Container App
+az containerapp delete \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --yes
+
+# 2. Eliminar Container Environment
+az containerapp env delete \
+  --name $ENV_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --yes
+
+# 3. Eliminar PostgreSQL
+az postgres flexible-server delete \
+  --name $DB_SERVER_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --yes
+
+# 4. Eliminar grupo de recursos vacío
+az group delete \
+  --name $RESOURCE_GROUP \
+  --yes
+```
+
+### ⏱️ Tiempo de eliminación: ~5-10 minutos
+
+---
+
+## 🔧 Troubleshooting
+
+### Problema 1: Container App no inicia
+
+**Síntomas**: App muestra error 500 o no responde
+
+**Solución**:
+```bash
+# Ver logs
+az containerapp logs show \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --tail 100
+
+# Verificar variables de entorno
+az containerapp show \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --query properties.template.containers[0].env
+```
+
+### Problema 2: Error de conexión a base de datos
+
+**Síntomas**: "could not connect to server" o "SSL connection error"
+
+**Solución**:
+```bash
+# Verificar que PostgreSQL está activo
+az postgres flexible-server show \
+  --name $DB_SERVER_NAME \
+  --resource-group $RESOURCE_GROUP
+
+# Verificar firewall
+az postgres flexible-server firewall-rule list \
+  --name $DB_SERVER_NAME \
+  --resource-group $RESOURCE_GROUP
+
+# Verificar certificado SSL está en la imagen
+docker run --rm ${DOCKER_HUB_USER}/gestion-conserjeria:latest ls -la /app/*.pem
+```
+
+### Problema 3: App no escala a 0
+
+**Síntomas**: Costos más altos de lo esperado
+
+**Solución**:
+```bash
+# Verificar configuración de escalado
+az containerapp show \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --query properties.template.scale
+
+# Actualizar si es necesario
+az containerapp update \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --min-replicas 0 \
   --max-replicas 5
 ```
 
-### Ver Estado de Recursos
+### Problema 4: Imagen Docker no se encuentra
 
-```powershell
-# Estado del Container App
-az containerapp show `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02
+**Síntomas**: "ImagePullBackOff" o "image not found"
 
-# Estado del MySQL Server
-az mysql flexible-server show `
-  --resource-group gr-coserjeria02 `
-  --name servidor-conserjeria02
+**Solución**:
+```bash
+# Verificar que la imagen existe en Docker Hub
+docker pull ${DOCKER_HUB_USER}/gestion-conserjeria:latest
 
-# Estado del ACR
-az acr show `
-  --name acrconserjeria02br `
-  --resource-group gr-coserjeria02
-```
-
-### Reiniciar Aplicación
-
-```powershell
-# Forzar nueva revisión (reinicio)
-az containerapp revision restart `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02
-```
-
-### Ejecutar Comandos Django
-
-```powershell
-# Shell interactivo
-az containerapp exec `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --command "/bin/bash"
-
-# Crear superusuario
-az containerapp exec `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --command "python manage.py createsuperuser"
-
-# Collect static files
-az containerapp exec `
-  --name app-conserjeria02 `
-  --resource-group gr-coserjeria02 `
-  --command "python manage.py collectstatic --noinput"
+# Si la imagen es privada, agregar credenciales
+az containerapp registry set \
+  --name $APP_NAME \
+  --resource-group $RESOURCE_GROUP \
+  --server docker.io \
+  --username $DOCKER_HUB_USER \
+  --password $DOCKER_HUB_PASSWORD
 ```
 
 ---
 
-## Problemas Comunes y Soluciones
+## 💵 Estimación de Costos
 
-### Error: CSRF verification failed
+### Costos Detallados por Servicio
 
-**Problema:** Token CSRF inválido al enviar formularios.
+#### 1. Azure Container Apps
+- **Sin tráfico (min replicas: 0)**: $0.000112/vCPU-segundo + $0.000012/GB-segundo
+- **Con 1 réplica activa 24/7**:
+  - 0.5 vCPU × $0.000112 × 2,592,000 segundos/mes = ~$145
+  - 1 GB RAM × $0.000012 × 2,592,000 segundos/mes = ~$31
+  - **Total: ~$176/mes** (por eso min replicas: 0 es clave)
+- **Con min replicas: 0 y uso ocasional**: **~$0.50-2/mes**
 
-**Solución:** Actualizar `CSRF_TRUSTED_ORIGINS` en `settings.py`:
-```python
-CSRF_TRUSTED_ORIGINS = [
-    'https://app-conserjeria02.ashyhill-67264477.brazilsouth.azurecontainerapps.io',
-]
+#### 2. PostgreSQL Flexible Server
+- **Burstable B1ms (1 vCore, 2 GB RAM)**: 
+  - Compute: ~$13/mes
+  - Storage (32 GB): ~$1.28/mes
+  - Backup: Incluido
+  - **Total: ~$14-15/mes**
+
+#### 3. Container Apps Environment
+- Incluido con Container Apps sin costo adicional cuando min replicas: 0
+
+#### 4. Docker Hub (Registry)
+- **Repositorio público**: **$0/mes**
+- Repositorio privado: $5/mes (no necesario para portafolio)
+
+### Escenarios de Uso
+
+| Escenario | Costo Mensual | Costo Diario |
+|-----------|---------------|--------------|
+| **Recursos eliminados (sin nada desplegado)** | **$0** | **$0** |
+| **Solo Container App (BD eliminada)** | ~$0.50-1 | ~$0.02-0.03 |
+| **Todo desplegado, sin tráfico** | ~$14-16 | ~$0.47-0.53 |
+| **Todo desplegado, BD activa solo 1 día** | ~$1.50 | ~$0.50 |
+| **Demo de 2 horas con BD** | ~$0.04 | - |
+
+### ⚡ Estrategia Óptima para Portafolio:
+
+```
+1. Mantener todo eliminado: $0/mes
+2. Cuando reclutador solicite demo:
+   - Desplegar todo: 45-60 min
+   - Costo de 1 día completo: ~$0.50
+3. Después de la demo:
+   - Eliminar recursos: 5 min
+   - Volver a $0/mes
 ```
 
-### Error: Unknown database
-
-**Problema:** Django no encuentra la base de datos.
-
-**Solución:** Verificar nombre correcto de la base de datos:
-```powershell
-az mysql flexible-server db list `
-  --resource-group gr-coserjeria02 `
-  --server-name servidor-conserjeria02
-```
-
-Usar `flexibleserverdb` como `DB_NAME`.
-
-### Error: SSL certificate verification failed
-
-**Problema:** Certificado SSL no válido para MySQL.
-
-**Solución:** 
-1. Descargar certificado correcto: `DigiCertGlobalRootG2.crt.pem`
-2. Colocar en raíz del proyecto
-3. Configurar en `settings.py`:
-```python
-'OPTIONS': {
-    'ssl': {
-        'ca': os.path.join(BASE_DIR, 'DigiCertGlobalRootG2.crt.pem')
-    }
-}
-```
-4. Reconstruir imagen
-
-### Error: Image pull failed
-
-**Problema:** Container App no puede descargar imagen del ACR.
-
-**Solución:** Verificar credenciales del ACR:
-```powershell
-az acr credential show --name acrconserjeria02br
-```
-Actualizar credenciales en Container App.
+**Costo anual estimado con 5 demos**: ~$2.50/año
 
 ---
 
-## Arquitectura Final
+## 📝 Notas Adicionales
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                     INTERNET                            │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     │ HTTPS
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│        Azure Container Apps (Brazil South)              │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │  app-conserjeria02                                │  │
-│  │  - Django 5.2.7 + Gunicorn                        │  │
-│  │  - Python 3.12                                    │  │
-│  │  - CPU: 0.5 vCPU, RAM: 1GB                        │  │
-│  │  - Auto-scaling: 0-10 replicas                    │  │
-│  └───────────────────────────────────────────────────┘  │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     │ SSL/TLS (Port 3306)
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│     Azure MySQL Flexible Server (Chile Central)         │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │  servidor-conserjeria02.mysql.database.azure.com │  │
-│  │  - MySQL 8.0.21                                   │  │
-│  │  - SKU: Standard_B1ms                             │  │
-│  │  - Storage: 20 GB                                 │  │
-│  │  - Database: flexibleserverdb                     │  │
-│  └───────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
+### Mejoras Futuras
+- [ ] Script de automatización completo (Bicep/Terraform)
+- [ ] CI/CD con GitHub Actions
+- [ ] Usar Azure Key Vault para secrets
+- [ ] Implementar Azure Front Door para CDN
+- [ ] Monitoreo con Application Insights
 
-┌─────────────────────────────────────────────────────────┐
-│   Azure Container Registry (Brazil South)               │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │  acrconserjeria02br.azurecr.io                    │  │
-│  │  - Image: conserjeria:latest                      │  │
-│  │  - SKU: Basic                                     │  │
-│  └───────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
-```
+### Recursos Útiles
+- [Documentación Azure Container Apps](https://docs.microsoft.com/azure/container-apps/)
+- [Documentación PostgreSQL Flexible](https://docs.microsoft.com/azure/postgresql/flexible-server/)
+- [Docker Hub](https://hub.docker.com/)
+- [Azure Pricing Calculator](https://azure.microsoft.com/pricing/calculator/)
 
 ---
 
-## Costos Estimados (USD/mes)
+## 🎓 Lecciones Aprendidas
 
-| Servicio | Configuración | Costo Aprox. |
-|----------|--------------|--------------|
-| Container Apps | 0.5 vCPU, 1GB RAM, scale to zero | $5-15 |
-| MySQL Flexible Server | Standard_B1ms, 20GB | $15-25 |
-| Container Registry | Basic | $5 |
-| **TOTAL ESTIMADO** | | **$25-45/mes** |
-
-**Nota:** Costos varían según uso real. Scale-to-zero minimiza costos de Container Apps.
+1. **Min replicas: 0 es clave** para mantener costos bajos en portafolios
+2. **Docker Hub gratuito** es suficiente para proyectos de demostración
+3. **PostgreSQL Flexible** es el tier más económico, pero aún costoso para portafolios
+4. **Eliminar recursos** después de cada demo es la mejor estrategia de costos
+5. **Backup de BD** es esencial para poder recrear el ambiente rápidamente
 
 ---
 
-## Checklist de Despliegue
-
-- [ ] Azure CLI instalado y configurado
-- [ ] Autenticación en tenant correcto
-- [ ] Grupo de recursos creado
-- [ ] MySQL Flexible Server creado
-- [ ] Base de datos creada/migrada
-- [ ] Container Registry creado y configurado
-- [ ] Container Apps Environment creado
-- [ ] Certificado SSL descargado
-- [ ] settings.py configurado correctamente
-- [ ] Dockerfile verificado
-- [ ] Imagen construida en ACR
-- [ ] Container App creado
-- [ ] Variables de entorno configuradas
-- [ ] Migraciones ejecutadas
-- [ ] CSRF_TRUSTED_ORIGINS actualizado
-- [ ] Aplicación accesible y funcional
-- [ ] Login y funcionalidades probadas
-
----
-
-## Referencias
-
-- [Azure Container Apps Documentation](https://learn.microsoft.com/azure/container-apps/)
-- [Azure MySQL Flexible Server](https://learn.microsoft.com/azure/mysql/flexible-server/)
-- [Azure Container Registry](https://learn.microsoft.com/azure/container-registry/)
-- [Django Deployment Checklist](https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/)
-
----
-
-## Información del Proyecto
-
-**Recursos Creados:**
-- Grupo de Recursos: `gr-coserjeria02`
-- MySQL Server: `servidor-conserjeria02.mysql.database.azure.com`
-- Database: `flexibleserverdb`
-- Container Registry: `acrconserjeria02br.azurecr.io`
-- Container App: `app-conserjeria02`
-- Environment: `env-conserjeria02`
-- URL: `https://app-conserjeria02.ashyhill-67264477.brazilsouth.azurecontainerapps.io`
-
-**Región Principal:** Brazil South (Container Apps + ACR)  
-**Región Secundaria:** Chile Central (MySQL)
-
-**Credenciales:**
-- MySQL User: `Javier`
-- MySQL Password: `Estrella.23`
-- Database: `flexibleserverdb`
-
----
-
-*Documento creado el 30 de Diciembre de 2025*
+**Versión**: 2.0  
+**Última actualización**: Diciembre 2025  
+**Autor**: Javier Castro  
+**Repositorio**: [GitHub](https://github.com/cocoup1/Gestion-Conserjeria)
