@@ -27,7 +27,7 @@ ALLOWED_HOSTS = env.list(
 
 # PARA VARIABLES EN AZURE -> ALLOWED_HOSTS=.azurewebsites.net
 CSRF_TRUSTED_ORIGINS = [
-    'https://gestion-conserjeria-dgarhydjhfdphvea.westeurope-01.azurewebsites.net',
+    'https://app-conserjeria02.ashyhill-67264477.brazilsouth.azurecontainerapps.io',
     'http://127.0.0.1:8081'
 ]
 
@@ -90,7 +90,7 @@ DATABASES = {
         'HOST': env('DB_HOST'),
         'PORT': env.int('DB_PORT', default=3306),
         'OPTIONS': {
-            'ssl': {'ca': os.path.join(BASE_DIR, 'DigiCertGlobalRootCA.crt.pem')}
+            'ssl': {'ca': os.path.join(BASE_DIR, 'DigiCertGlobalRootG2.crt.pem')}
         }
     }
 }

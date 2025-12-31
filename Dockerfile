@@ -2,7 +2,8 @@
 FROM python:3.12-slim-bullseye
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PORT=8000
 
 # Dependencias del SO necesarias para xhtml2pdf/reportlab/cairo/pango/freetype
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -20,4 +21,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
-CMD ["bash", "-lc", "gunicorn core.wsgi:application --bind 0.0.0.0:${PORT:-8000} --timeout 600"]
+# Recolectar archivos estáticos (requiere SECRET_KEY en build time o usar --noinput)
+RUN python manage.py collectstatic --noinput || echo "Collectstatic failed, will run at startup"
+
+EXPOSE 8000
+
+CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--timeout", "600", "--workers", "2"]
